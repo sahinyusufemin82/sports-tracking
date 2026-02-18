@@ -68,7 +68,7 @@
                 <button class="primary-btn" onclick="girisYap()">Giriş Yap</button>
                 <button class="primary-btn" onclick="kayitOl()" style="background-color: #6c757d;">Kayıt Ol</button>
             </div>
-            <div style="margin-top:20px; font-size:12px; opacity:0.6;">FitTakip Pro v5.0</div>
+            <div style="margin-top:20px; font-size:12px; opacity:0.6;">FitTakip Pro v5.1 (Fixed)</div>
         </div>
     </div>
 
@@ -169,11 +169,8 @@
     </div>
 
 <script>
-    // --- BURASI ÇOK ÖNEMLİ: KENDİ KODUNU BURAYA YAPIŞTIR ---
-    // Firebase sayfasındaki "const firebaseConfig = { ... }" kısmını
-    // aşağıdaki süslü parantezlerin arasına birebir yapıştır.
-    
-const firebaseConfig = {
+    // --- FIREBASE AYARLARI ---
+    const firebaseConfig = {
       apiKey: "AIzaSyB656zs8jf-Pib4nDGjzm81EDYsK8WL-Xc",
       authDomain: "fittakipp.firebaseapp.com",
       projectId: "fittakipp",
@@ -183,19 +180,20 @@ const firebaseConfig = {
       measurementId: "G-81YYJKDC4R"
     };
 
-    // --------------------------------------------------------
-
-    // Firebase'i Başlat
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Veri Yapısı
-    let appData = {
+    // --- ÖNEMLİ: VARSAYILAN BOŞ VERİ ---
+    // Her yeni kullanıcı veya sıfırlama için bu şablon kullanılır
+    const defaultData = {
         activities: [], history: [],
         weight: 0, height: 0, targetWeight: 0, weightFreq: 7, lastWeightUpdate: null,
         dailySteps: 0, lastDate: new Date().toLocaleDateString('tr-TR'), theme: 'light'
     };
+
+    // Başlangıçta veriyi varsayılan olarak ayarla
+    let appData = JSON.parse(JSON.stringify(defaultData));
 
     // --- OTURUM YÖNETİMİ ---
     auth.onAuthStateChanged(user => {
@@ -221,13 +219,24 @@ const firebaseConfig = {
     function kayitOl() {
         const e = document.getElementById('email').value;
         const p = document.getElementById('password').value;
+        
+        // Önce hafızayı temizle, sonra kayıt ol
+        appData = JSON.parse(JSON.stringify(defaultData)); 
+        
         auth.createUserWithEmailAndPassword(e, p).then(() => {
-            // Yeni kullanıcı için boş veritabanı oluştur
-            saveToCloud();
+            saveToCloud(); // Yeni temiz veriyi kaydet
         }).catch(err => showError(err.message));
     }
 
-    function cikisYap() { auth.signOut(); }
+    function cikisYap() { 
+        auth.signOut().then(() => {
+            // ÇIKIŞ YAPILINCA HAFIZAYI SIFIRLA (En Kritik Yer Burası)
+            appData = JSON.parse(JSON.stringify(defaultData)); 
+            updateUI();
+            location.reload(); // Sayfayı yenile ki her şey %100 temizlensin
+        });
+    }
+
     function showError(msg) { 
         const el = document.getElementById('loginError'); 
         el.style.display='block'; 
@@ -251,34 +260,39 @@ const firebaseConfig = {
     function loadFromCloud(uid) {
         db.collection('users').doc(uid).get().then(doc => {
             if (doc.exists) {
-                appData = doc.data(); // Veriyi al
-                updateUI(); // Ekranı güncelle
-                checkNewDay(); // Gün kontrolü yap
+                // Eğer veri varsa çek
+                appData = doc.data();
+                updateUI();
+                checkNewDay();
             } else {
-                saveToCloud(); // İlk kez giriyorsa oluştur
+                // Eğer kullanıcı var ama verisi yoksa (yeni kullanıcı),
+                // Önceki kullanıcının verisini kullanma! SIFIRLA.
+                appData = JSON.parse(JSON.stringify(defaultData));
+                saveToCloud();
+                updateUI();
             }
+        }).catch(error => {
+            console.error("Veri çekme hatası:", error);
         });
     }
 
-    // --- HESAPLAMA & UI (ESKİ KODLARIMIZIN AYNISI) ---
+    // --- HESAPLAMA & UI ---
     function updateWeightDate() { appData.lastWeightUpdate = new Date().toISOString().split('T')[0]; calculate(); }
     
     function calculate() {
-        // UI'dan veriyi al
         appData.dailySteps = parseInt(document.getElementById('dailySteps').value) || 0;
         appData.height = parseFloat(document.getElementById('uHeight').value) || 0;
         appData.weight = parseFloat(document.getElementById('uWeight').value) || 0;
         appData.targetWeight = parseFloat(document.getElementById('uTarget').value) || 0;
         appData.weightFreq = parseInt(document.getElementById('uFreq').value) || 7;
 
-        // Kalori
         const sCal = Math.round(appData.dailySteps * 0.04);
-        let spCal = 0; appData.activities.forEach(a => { if(a.completed) spCal += a.cal; });
+        let spCal = 0; if(appData.activities) appData.activities.forEach(a => { if(a.completed) spCal += a.cal; });
+        
         document.getElementById('totalCal').innerText = sCal + spCal;
         document.getElementById('stepCal').innerText = sCal;
         document.getElementById('sportCal').innerText = spCal;
 
-        // BMI
         if(appData.height > 0 && appData.weight > 0) {
             const h = appData.height/100;
             const bmi = (appData.weight / (h*h)).toFixed(1);
@@ -291,23 +305,21 @@ const firebaseConfig = {
         document.getElementById('tarW').innerText = appData.targetWeight;
         if(appData.targetWeight > 0) document.getElementById('wProg').style.width = "100%";
 
-        // Hatırlatma
         if(appData.lastWeightUpdate) {
             const diff = Math.ceil(Math.abs(new Date() - new Date(appData.lastWeightUpdate)) / 86400000);
             document.getElementById('weightReminder').style.display = (diff > appData.weightFreq) ? 'block' : 'none';
         }
         
-        saveToCloud(); // Her değişiklikte buluta yaz
+        saveToCloud();
         renderTasks();
     }
 
-    // --- DİĞER FONKSİYONLAR ---
     function updateUI() {
-        document.getElementById('uHeight').value = appData.height;
-        document.getElementById('uWeight').value = appData.weight;
-        document.getElementById('uTarget').value = appData.targetWeight;
-        document.getElementById('uFreq').value = appData.weightFreq;
-        document.getElementById('dailySteps').value = appData.dailySteps;
+        document.getElementById('uHeight').value = appData.height || 0;
+        document.getElementById('uWeight').value = appData.weight || 0;
+        document.getElementById('uTarget').value = appData.targetWeight || 0;
+        document.getElementById('uFreq').value = appData.weightFreq || 7;
+        document.getElementById('dailySteps').value = appData.dailySteps || 0;
         applyTheme();
         calculate();
         renderHistory();
@@ -319,6 +331,7 @@ const firebaseConfig = {
         const c = parseInt(document.getElementById('actCal').value);
         const l = document.getElementById('actLink').value;
         if(n && c) {
+            if(!appData.activities) appData.activities = [];
             appData.activities.push({id:Date.now(), name:n, cal:c, link:l, completed:false});
             document.getElementById('actName').value=''; document.getElementById('actCal').value='';
             updateUI(); alert("Eklendi!");
@@ -336,26 +349,31 @@ const firebaseConfig = {
 
     function renderTasks() {
         const c = document.getElementById('taskList'); c.innerHTML = '';
-        appData.activities.forEach(a => {
-            c.innerHTML += `<div class="task-item"><input type="checkbox" ${a.completed?'checked':''} onchange="toggleTask(${a.id})" style="width:20px;margin-right:10px;"><div><b>${a.name}</b> (${a.cal} kcal) ${a.link ? `<a href="${a.link}" target="_blank">▶</a>`:''}</div></div>`;
-        });
+        if(appData.activities) {
+            appData.activities.forEach(a => {
+                c.innerHTML += `<div class="task-item"><input type="checkbox" ${a.completed?'checked':''} onchange="toggleTask(${a.id})" style="width:20px;margin-right:10px;"><div><b>${a.name}</b> (${a.cal} kcal) ${a.link ? `<a href="${a.link}" target="_blank">▶</a>`:''}</div></div>`;
+            });
+        }
     }
 
     function renderManage() {
         const c = document.getElementById('manageList'); c.innerHTML='';
-        appData.activities.forEach(a => c.innerHTML += `<div class="task-item"><span>${a.name}</span> <button onclick="deleteTask(${a.id})" style="margin-left:auto;background:#dc3545;color:white;border:none;border-radius:4px;">Sil</button></div>`);
+        if(appData.activities) {
+            appData.activities.forEach(a => c.innerHTML += `<div class="task-item"><span>${a.name}</span> <button onclick="deleteTask(${a.id})" style="margin-left:auto;background:#dc3545;color:white;border:none;border-radius:4px;">Sil</button></div>`);
+        }
     }
 
     function checkNewDay() {
         const t = new Date().toLocaleDateString('tr-TR');
-        if(appData.lastDate !== t) { endDay(true); appData.lastDate = t; appData.dailySteps=0; appData.activities.forEach(a=>a.completed=false); saveToCloud(); alert("Yeni gün!"); }
+        if(appData.lastDate !== t) { endDay(true); appData.lastDate = t; appData.dailySteps=0; if(appData.activities) appData.activities.forEach(a=>a.completed=false); saveToCloud(); alert("Yeni gün!"); }
     }
 
     function endDay(auto=false) {
         if(!auto && !confirm("Günü bitir?")) return;
-        const s = Math.round(appData.dailySteps * 0.04);
-        let sp = 0; appData.activities.forEach(a => { if(a.completed) sp += a.cal; });
+        const s = Math.round((appData.dailySteps || 0) * 0.04);
+        let sp = 0; if(appData.activities) appData.activities.forEach(a => { if(a.completed) sp += a.cal; });
         if(s+sp > 0) {
+            if(!appData.history) appData.history = [];
             appData.history.unshift({date: appData.lastDate, total: s+sp, steps: appData.dailySteps});
             if(!auto) { appData.dailySteps=0; appData.activities.forEach(a=>a.completed=false); }
             saveToCloud(); updateUI();
@@ -364,7 +382,9 @@ const firebaseConfig = {
 
     function renderHistory() {
         const t = document.querySelector('#historyTable tbody'); t.innerHTML='';
-        appData.history.forEach(h => t.innerHTML += `<tr><td>${h.date}</td><td>${h.steps}</td><td>${h.total} kcal</td></tr>`);
+        if(appData.history) {
+            appData.history.forEach(h => t.innerHTML += `<tr><td>${h.date}</td><td>${h.steps}</td><td>${h.total} kcal</td></tr>`);
+        }
     }
     function clearHistory() { if(confirm("Sil?")) { appData.history=[]; saveToCloud(); updateUI(); } }
 
