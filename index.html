@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>FitTakip Pro</title>
+    <title>FitTakip Pro Final</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
@@ -43,7 +43,7 @@
             background-color: var(--bg);
             color: var(--text-main);
             margin: 0; padding: 0;
-            padding-bottom: calc(var(--nav-height) + 20px); /* Alt menü için boşluk */
+            padding-bottom: calc(var(--nav-height) + 20px);
             transition: background 0.3s, color 0.3s;
         }
 
@@ -70,7 +70,7 @@
             font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
 
-        /* --- GİRİŞ SAYFASI (Modern Landing) --- */
+        /* --- GİRİŞ SAYFASI --- */
         #loginPage {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 999;
@@ -107,7 +107,15 @@
         .header-title h2 { margin: 0; font-size: 24px; font-weight: 700; }
         .header-title span { font-size: 12px; color: var(--text-sub); display: block; }
 
-        /* --- ALT MENÜ (Bottom Bar) --- */
+        /* --- DURUM GÖSTERGESİ (KAYDEDİLİYOR) --- */
+        #status-indicator {
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: white; padding: 5px 15px;
+            border-radius: 20px; font-size: 11px; z-index: 2000;
+            display: none; pointer-events: none;
+        }
+
+        /* --- ALT MENÜ --- */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height);
             background: var(--surface);
@@ -126,7 +134,7 @@
         [data-theme="dark"] .nav-item.active { color: #a29bfe; }
 
         /* --- SAYFALAR & KARTLAR --- */
-        .page { display: none; padding: 0 20px; max-width: 600px; margin: 0 auto; animation: fadeIn 0.4s ease; }
+        .page { display: none; padding: 0 20px; max-width: 600px; margin: 0 auto; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -138,7 +146,6 @@
         }
         .card h2 { margin-top: 0; font-size: 18px; display: flex; align-items: center; gap: 10px; }
         
-        /* ÖZEL WIDGETLAR */
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; text-align: center; }
         .stat-box strong { font-size: 22px; display: block; color: #764ba2; }
         [data-theme="dark"] .stat-box strong { color: #a29bfe; }
@@ -162,14 +169,12 @@
         .checked .checkbox::after { content: '✔'; color: white; font-size: 14px; }
         .checked span { text-decoration: line-through; opacity: 0.5; }
 
-        /* HATA MESAJI */
         .error-msg {
             color: #ff6b6b; background: rgba(255, 107, 107, 0.1);
             padding: 10px; border-radius: 8px; font-size: 13px; margin-top: 10px;
             display: none; text-align: left;
         }
         
-        /* AYARLAR INPUTLARI */
         .setting-row { margin-bottom: 15px; }
         .setting-row label { display: block; font-size: 13px; color: var(--text-sub); margin-bottom: 5px; }
         .setting-row input, .setting-row select {
@@ -180,6 +185,8 @@
     </style>
 </head>
 <body>
+
+    <div id="status-indicator">Kaydediliyor... ☁️</div>
 
     <div id="loginPage">
         <div style="position: absolute; top:20px; right:20px; display:flex; gap:10px;">
@@ -209,7 +216,7 @@
                 <button class="btn-outline" onclick="showForm('register')" id="btn_welcome_reg">Hesap Oluştur</button>
             </div>
         </div>
-        <p style="margin-top:20px; font-size:12px; color:var(--text-sub); opacity:0.5;">v11.0 Ultimate Design</p>
+        <p style="margin-top:20px; font-size:12px; color:var(--text-sub); opacity:0.5;">v12.0 Final Release</p>
     </div>
 
     <div id="appPage">
@@ -230,10 +237,7 @@
             <div id="weightReminder" class="card" style="background: linear-gradient(to right, #f6d365, #fda085); color:#fff; display:none; border:none;" onclick="switchPage('profile')">
                 <div style="display:flex; align-items:center; gap:10px;">
                     <span style="font-size:24px;">⚖️</span>
-                    <div>
-                        <strong style="display:block;">Hatırlatma</strong>
-                        <span id="txt_remind" style="font-size:13px; opacity:0.9;">Tartılma zamanı geldi!</span>
-                    </div>
+                    <div><strong style="display:block;">Hatırlatma</strong><span id="txt_remind" style="font-size:13px; opacity:0.9;">Tartılma zamanı geldi!</span></div>
                 </div>
             </div>
 
@@ -261,15 +265,12 @@
             <div class="card">
                 <h2 id="txt_todayWork">Görevler</h2>
                 <div id="taskList"></div>
-                <div style="text-align:center; padding-top:10px; color:var(--text-sub); font-size:12px;">
-                    Aktivite eklemek için <b>+</b> butonuna bas.
-                </div>
             </div>
 
             <div class="card">
                 <h2 id="txt_stepCount">Hızlı Adım Girişi 👟</h2>
                 <div class="input-group">
-                    <input type="number" id="dailySteps" placeholder="Adım sayısı..." oninput="calculate()">
+                    <input type="number" id="dailyStepsInput" placeholder="Adım sayısı..." oninput="handleStepInput(this.value)">
                 </div>
             </div>
         </div>
@@ -277,21 +278,11 @@
         <div id="add-activity" class="page">
             <div class="card">
                 <h2 id="txt_addAct">Yeni Aktivite ⚡</h2>
-                <div class="setting-row">
-                    <label>Aktivite Adı</label>
-                    <input type="text" id="actName" placeholder="Örn: Koşu, Yüzme...">
-                </div>
-                <div class="setting-row">
-                    <label>Kalori Değeri (kcal)</label>
-                    <input type="number" id="actCal" placeholder="0">
-                </div>
-                <div class="setting-row">
-                    <label>Video Linki (Opsiyonel)</label>
-                    <input type="url" id="actLink" placeholder="YouTube...">
-                </div>
+                <div class="setting-row"><label>Aktivite Adı</label><input type="text" id="actName" placeholder="Örn: Koşu, Yüzme..."></div>
+                <div class="setting-row"><label>Kalori Değeri (kcal)</label><input type="number" id="actCal" placeholder="0"></div>
+                <div class="setting-row"><label>Video Linki (Opsiyonel)</label><input type="url" id="actLink" placeholder="YouTube..."></div>
                 <button class="btn-grad" onclick="addNewActivity()" id="btn_addList">Listeye Ekle</button>
             </div>
-
             <div class="card">
                 <h2 id="txt_myList">Kayıtlı Aktivitelerim</h2>
                 <div id="manageList"></div>
@@ -303,9 +294,7 @@
                 <h2 id="txt_histTitle">Geçmiş Kayıtlar 📜</h2>
                 <table width="100%" id="historyTable" style="text-align:left; border-collapse:collapse; margin-top:10px;">
                     <thead style="border-bottom:2px solid var(--border); color:var(--text-sub); font-size:12px;">
-                        <th style="padding:10px;" id="th_date">Tarih</th>
-                        <th id="th_step">Adım</th>
-                        <th id="th_cal">Kcal</th>
+                        <th style="padding:10px;" id="th_date">Tarih</th><th id="th_step">Adım</th><th id="th_cal">Kcal</th>
                     </thead>
                     <tbody style="font-size:14px;"></tbody>
                 </table>
@@ -316,33 +305,20 @@
         <div id="profile" class="page">
             <div class="card">
                 <h2 id="txt_settings">Profil Ayarları ⚙️</h2>
-                
-                <div class="setting-row">
-                    <label id="lbl_height">Boy (cm)</label>
-                    <input type="number" id="uHeight" onchange="calculate()">
-                </div>
-                <div class="setting-row">
-                    <label id="lbl_weight">Güncel Kilo (kg)</label>
-                    <input type="number" id="uWeight" onchange="updateWeightDate()">
-                </div>
-                <div class="setting-row">
-                    <label id="lbl_target">Hedef Kilo (kg)</label>
-                    <input type="number" id="uTarget" onchange="saveToCloud()">
-                </div>
+                <div class="setting-row"><label id="lbl_height">Boy (cm)</label><input type="number" id="uHeight" oninput="handleProfileInput()"></div>
+                <div class="setting-row"><label id="lbl_weight">Güncel Kilo (kg)</label><input type="number" id="uWeight" oninput="handleProfileInput(true)"></div>
+                <div class="setting-row"><label id="lbl_target">Hedef Kilo (kg)</label><input type="number" id="uTarget" oninput="handleProfileInput()"></div>
                 <div class="setting-row">
                     <label id="lbl_freq">Tartılma Hatırlatıcısı</label>
-                    <select id="uFreq" onchange="saveToCloud()">
+                    <select id="uFreq" onchange="handleProfileInput()">
                         <option value="7">Haftada 1</option>
                         <option value="30">Ayda 1</option>
                     </select>
                 </div>
-
-                <button class="btn-grad" onclick="saveToCloud(); alert(t('alert_saved'));" id="btn_save">Ayarları Kaydet</button>
             </div>
 
             <div class="card" style="border:1px solid #ff7675;">
                 <h2 style="color:#ff7675;">Oturum</h2>
-                <p id="txt_endDay" style="font-size:13px; color:var(--text-sub);">Günü bitirip istatistikleri arşive kaldırır.</p>
                 <button class="btn-outline" style="border-color:#ff7675; color:#ff7675;" onclick="endDay()" id="btn_archive">Günü Bitir</button>
                 <div style="height:10px;"></div>
                 <button class="btn-outline" style="border-color:#636e72; color:#636e72;" onclick="cikisYap()" id="menu_logout">Çıkış Yap</button>
@@ -350,24 +326,15 @@
         </div>
 
         <nav class="bottom-nav">
-            <a href="#" class="nav-item active" onclick="switchPage('dashboard', this)">
-                <i>🏠</i> <span id="menu_home">Ana Sayfa</span>
-            </a>
-            <a href="#" class="nav-item" onclick="switchPage('add-activity', this)">
-                <i>⚡</i> <span id="menu_add">Ekle</span>
-            </a>
-            <a href="#" class="nav-item" onclick="switchPage('history', this)">
-                <i>📅</i> <span id="menu_history">Geçmiş</span>
-            </a>
-            <a href="#" class="nav-item" onclick="switchPage('profile', this)">
-                <i>👤</i> <span id="menu_profile">Profil</span>
-            </a>
+            <a href="#" class="nav-item active" onclick="switchPage('dashboard', this)"><i>🏠</i> <span id="menu_home">Ana Sayfa</span></a>
+            <a href="#" class="nav-item" onclick="switchPage('add-activity', this)"><i>⚡</i> <span id="menu_add">Ekle</span></a>
+            <a href="#" class="nav-item" onclick="switchPage('history', this)"><i>📅</i> <span id="menu_history">Geçmiş</span></a>
+            <a href="#" class="nav-item" onclick="switchPage('profile', this)"><i>👤</i> <span id="menu_profile">Profil</span></a>
         </nav>
-
     </div>
 
 <script>
-    // --- FIREBASE KONFİGÜRASYONU ---
+    // --- FIREBASE BAŞLATMA ---
     const firebaseConfig = {
       apiKey: "AIzaSyB656zs8jf-Pib4nDGjzm81EDYsK8WL-Xc",
       authDomain: "fittakipp.firebaseapp.com",
@@ -382,112 +349,69 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // --- DİL PAKETİ ---
-    const langPack = {
-        tr: {
-            loginSub: "Hedefine ulaş, sınırlarını zorla.",
-            emailPh: "E-posta Adresi", passPh: "Şifre",
-            loginBtn: "Devam Et →", regBtn: "Hesap Oluştur",
-            welcome_login: "Giriş Yap", welcome_reg: "Kayıt Ol",
-            
-            menu_home: "Ana Sayfa", menu_add: "Ekle", menu_history: "Geçmiş", menu_profile: "Profil", menu_logout: "Çıkış Yap",
-            remind: "Tartılma zamanı geldi!",
-            bodyStat: "Vücut Durumu", cur: "Kilo", tar: "Hedef",
-            total: "Günlük Özet", step: "ADIM", sport: "SPOR",
-            todayWork: "Görevler", stepCount: "Hızlı Adım Girişi",
-            addAct: "Yeni Aktivite", actNamePh: "Ad (Örn: Yürüyüş)", actCalPh: "Kalori", addListBtn: "Listeye Ekle", myList: "Kayıtlı Aktivitelerim",
-            histTitle: "Geçmiş Kayıtlar", th_date: "Tarih", th_step: "Adım", th_cal: "Kcal", clearHist: "Temizle",
-            settings: "Profil Ayarları", lbl_height: "Boy (cm)", lbl_weight: "Güncel Kilo (kg)", lbl_target: "Hedef Kilo", lbl_freq: "Hatırlatma", saveBtn: "Ayarları Kaydet",
-            endDay: "Günü bitirip arşive kaldırır.", archBtn: "Günü Bitir",
-            
-            alert_newDay: "☀️ Yeni bir gün başladı! İstatistikler sıfırlandı.", alert_saved: "✅ Kaydedildi!", alert_added: "✅ Eklendi!",
-            lbl_normal: "Normal", lbl_over: "Fazla", lbl_obese: "Obez", lbl_weak: "Zayıf",
-            welcome_user: "Hoş geldin,"
-        },
-        en: {
-            loginSub: "Reach your goals, push your limits.",
-            emailPh: "Email Address", passPh: "Password",
-            loginBtn: "Continue →", regBtn: "Create Account",
-            welcome_login: "Login", welcome_reg: "Register",
-
-            menu_home: "Home", menu_add: "Add", menu_history: "History", menu_profile: "Profile", menu_logout: "Logout",
-            remind: "Time to weigh in!",
-            bodyStat: "Body Status", cur: "Weight", tar: "Target",
-            total: "Daily Summary", step: "STEPS", sport: "SPORT",
-            todayWork: "Today's Tasks", stepCount: "Step Entry",
-            addAct: "New Activity", actNamePh: "Name (e.g. Run)", actCalPh: "Calories", addListBtn: "Add to List", myList: "My Activities",
-            histTitle: "History Logs", th_date: "Date", th_step: "Steps", th_cal: "Kcal", clearHist: "Clear",
-            settings: "Profile Settings", lbl_height: "Height (cm)", lbl_weight: "Current Weight (kg)", lbl_target: "Target Weight", lbl_freq: "Reminder Freq", saveBtn: "Save Settings",
-            endDay: "Archive stats and end day.", archBtn: "End Day",
-            
-            alert_newDay: "☀️ A new day has started! Stats reset.", alert_saved: "✅ Saved!", alert_added: "✅ Added!",
-            lbl_normal: "Normal", lbl_over: "Overweight", lbl_obese: "Obese", lbl_weak: "Underweight",
-            welcome_user: "Welcome,"
-        }
-    };
-
+    // --- VERİ MODELİ ---
     const defaultData = {
-        activities: [], history: [],
+        activities: [], 
+        history: [],
         weight: 0, height: 0, targetWeight: 0, weightFreq: 7, lastWeightUpdate: null,
-        dailySteps: 0, lastDate: new Date().toLocaleDateString('tr-TR'), 
+        dailySteps: 0, // Bu değer veritabanında saklanır
+        lastDate: new Date().toLocaleDateString('tr-TR'), 
         theme: 'light', lang: 'tr'
     };
 
     let appData = JSON.parse(JSON.stringify(defaultData));
-    let localLang = localStorage.getItem('localLang') || 'tr';
-    let localTheme = localStorage.getItem('localTheme') || 'light';
-    let authMode = 'login'; 
+    let saveTimeout = null; // Debounce için zamanlayıcı
 
-    window.onload = function() { applySettingsToDOM(localLang, localTheme); };
+    // --- SAYFA YÜKLENİNCE ---
+    window.onload = function() {
+        const localLang = localStorage.getItem('localLang') || 'tr';
+        const localTheme = localStorage.getItem('localTheme') || 'light';
+        applySettingsToDOM(localLang, localTheme);
+    };
 
-    // --- UI FONKSİYONLARI ---
-    function showForm(mode) {
-        authMode = mode;
-        const p = langPack[localLang];
-        document.getElementById('form-title').innerText = (mode === 'login') ? p.welcome_login : p.welcome_reg;
-        document.getElementById('btn_action').innerText = p.loginBtn;
-        document.getElementById('welcome-buttons').style.display = 'none';
-        document.getElementById('auth-forms').style.display = 'block';
-        document.getElementById('loginError').style.display = 'none';
-    }
-    function goBack() {
-        document.getElementById('auth-forms').style.display = 'none';
-        document.getElementById('welcome-buttons').style.display = 'block';
-        document.getElementById('password').value = '';
-    }
-
-    // --- AUTH ---
+    // --- AUTH YÖNETİMİ ---
     auth.onAuthStateChanged(user => {
         if (user) {
-            enterApp(user);
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('appPage').style.display = 'block';
+            document.getElementById('userEmailShort').innerText = user.email.split('@')[0];
+            loadFromCloud(user.uid);
         } else {
             document.getElementById('loginPage').style.display = 'flex';
             document.getElementById('appPage').style.display = 'none';
         }
     });
 
-    function girisYap() {
-        const e = document.getElementById('email').value;
-        const p = document.getElementById('password').value;
-        auth.signInWithEmailAndPassword(e, p).catch(err => showError(err.message));
-    }
-    function kayitOl() {
-        const e = document.getElementById('email').value;
-        const p = document.getElementById('password').value;
-        appData = JSON.parse(JSON.stringify(defaultData)); appData.lang = localLang; appData.theme = localTheme;
-        auth.createUserWithEmailAndPassword(e, p).then((cred) => { saveToCloud(cred.user.uid); }).catch(err => showError(err.message));
-    }
-    function performAuth() { if(authMode === 'login') girisYap(); else kayitOl(); }
-    function cikisYap() { auth.signOut().then(() => location.reload()); }
-    
-    function enterApp(user) {
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('appPage').style.display = 'block';
-        document.getElementById('userEmailShort').innerText = user.email.split('@')[0];
-        loadFromCloud(user.uid);
+    function showForm(mode) {
+        document.getElementById('welcome-buttons').style.display = 'none';
+        document.getElementById('auth-forms').style.display = 'block';
+        window.currentAuthMode = mode;
+        const p = langPack[appData.lang || localStorage.getItem('localLang') || 'tr'];
+        document.getElementById('form-title').innerText = (mode === 'login') ? p.welcome_login : p.welcome_reg;
+        document.getElementById('btn_action').innerText = (mode === 'login') ? p.loginBtn : p.regBtn;
     }
     
-    function showError(msg) {
+    function goBack() {
+        document.getElementById('auth-forms').style.display = 'none';
+        document.getElementById('welcome-buttons').style.display = 'block';
+        document.getElementById('password').value = '';
+    }
+
+    function performAuth() {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('password').value;
+        if(window.currentAuthMode === 'login') {
+            auth.signInWithEmailAndPassword(e, p).catch(showError);
+        } else {
+            auth.createUserWithEmailAndPassword(e, p).then(cred => {
+                // Yeni kullanıcı için boş veri yaz
+                saveToCloudInternal(cred.user.uid, defaultData);
+            }).catch(showError);
+        }
+    }
+
+    function showError(err) {
+        const msg = err.message;
         const errBox = document.getElementById('loginError'); errBox.style.display = 'block';
         if (msg.includes('email-already-in-use')) errBox.innerHTML = "⚠️ E-posta zaten kullanımda.";
         else if (msg.includes('wrong-password')) errBox.innerText = "⚠️ Hatalı şifre.";
@@ -496,90 +420,189 @@
         else errBox.innerText = "Hata: " + msg;
     }
 
-    // --- LOGIC ---
-    function saveToCloud(uid = null) {
-        const user = auth.currentUser;
-        if(uid || user) db.collection('users').doc(uid || user.uid).set(appData).catch(e=>console.log(e));
-    }
+    function cikisYap() { auth.signOut().then(() => location.reload()); }
+
+    // --- VERİTABANI İŞLEMLERİ (CRITICAL FIX) ---
+
+    // 1. VERİ OKUMA
     function loadFromCloud(uid) {
         db.collection('users').doc(uid).get().then(doc => {
             if (doc.exists) {
-                appData = doc.data();
-                if(!appData.lang) appData.lang = 'tr';
+                const data = doc.data();
+                // Eksik alanları varsayılanlarla tamamla
+                appData = { ...defaultData, ...data };
+                
+                // Temel ayarları uygula
                 applySettingsToDOM(appData.lang, appData.theme);
-                updateUI();
+                
+                // Kritik: Inputları doldur
+                fillInputsFromData();
+                
+                // Hesaplamaları yap
+                calculateStats();
+                
+                // Gün kontrolü
                 checkNewDay();
             } else {
                 appData = JSON.parse(JSON.stringify(defaultData));
-                saveToCloud(uid); updateUI();
+                saveToCloud(); // İlk kez oluştur
+                fillInputsFromData();
             }
         });
     }
 
-    function calculate() {
-        appData.dailySteps = parseInt(document.getElementById('dailySteps').value) || 0;
+    // 2. INPUTLARI DOLDURMA (Veriden Ekrana)
+    function fillInputsFromData() {
+        document.getElementById('dailyStepsInput').value = appData.dailySteps || ""; // 0 yerine boş gösterilebilir veya 0
+        document.getElementById('uHeight').value = appData.height || "";
+        document.getElementById('uWeight').value = appData.weight || "";
+        document.getElementById('uTarget').value = appData.targetWeight || "";
+        document.getElementById('uFreq').value = appData.weightFreq || 7;
+        
+        renderTasks();
+        renderManage();
+        renderHistory();
+    }
+
+    // 3. AKILLI KAYIT (DEBOUNCE)
+    // Her tuşa basıldığında kaydetmek yerine, yazma bitince kaydeder.
+    function triggerSave() {
+        const indicator = document.getElementById('status-indicator');
+        
+        // Önceki bekleyen kaydı iptal et
+        if (saveTimeout) clearTimeout(saveTimeout);
+        
+        // Yeni bir kayıt emri ver (1 saniye bekle)
+        saveTimeout = setTimeout(() => {
+            indicator.style.display = 'block'; // Göster
+            saveToCloud().then(() => {
+                setTimeout(() => { indicator.style.display = 'none'; }, 1000); // 1 sn sonra gizle
+            });
+        }, 1000); // 1000ms bekleme süresi
+    }
+
+    function saveToCloud() {
+        const user = auth.currentUser;
+        if(!user) return Promise.resolve();
+        return saveToCloudInternal(user.uid, appData);
+    }
+
+    function saveToCloudInternal(uid, data) {
+        return db.collection('users').doc(uid).set(data).catch(e => console.error(e));
+    }
+
+    // --- EVENT HANDLERS (INPUT YÖNETİMİ) ---
+    
+    // Adım sayısı değişince
+    function handleStepInput(val) {
+        appData.dailySteps = parseInt(val) || 0;
+        calculateStats(); // Ekrandaki hesapları güncelle (Anlık)
+        triggerSave();    // Veritabanına kaydı sıraya al
+    }
+
+    // Profil verileri değişince
+    function handleProfileInput(isWeight = false) {
         appData.height = parseFloat(document.getElementById('uHeight').value) || 0;
         appData.weight = parseFloat(document.getElementById('uWeight').value) || 0;
         appData.targetWeight = parseFloat(document.getElementById('uTarget').value) || 0;
         appData.weightFreq = parseInt(document.getElementById('uFreq').value) || 7;
-
-        const sCal = Math.round(appData.dailySteps * 0.04);
-        let spCal = 0; if(appData.activities) appData.activities.forEach(a => { if(a.completed) spCal += a.cal; });
         
+        if(isWeight) {
+            appData.lastWeightUpdate = new Date().toISOString().split('T')[0];
+        }
+
+        calculateStats();
+        triggerSave();
+    }
+
+    // --- HESAPLAMA MOTORU ---
+    function calculateStats() {
+        const steps = appData.dailySteps || 0;
+        const sCal = Math.round(steps * 0.04);
+        
+        let spCal = 0; 
+        if(appData.activities) {
+            appData.activities.forEach(a => { if(a.completed) spCal += a.cal; });
+        }
+
         document.getElementById('totalCal').innerText = sCal + spCal;
         document.getElementById('stepCal').innerText = sCal;
         document.getElementById('sportCal').innerText = spCal;
 
+        // BMI ve Bar Hesaplama
+        const bmiLbl = document.getElementById('bmiLabel');
+        const p = langPack[appData.lang || 'tr'];
+        
         if(appData.height > 0 && appData.weight > 0) {
             const h = appData.height/100;
             const bmi = (appData.weight / (h*h)).toFixed(1);
-            const lbl = document.getElementById('bmiLabel');
-            const p = langPack[appData.lang || localLang];
+            bmiLbl.innerText = "BMI: " + bmi;
             
-            lbl.innerText = "BMI: " + bmi;
-            if(bmi<18.5) { lbl.style.background="#74b9ff"; lbl.style.color="#fff"; }
-            else if(bmi<25) { lbl.style.background="#00b894"; lbl.style.color="#fff"; }
-            else if(bmi<30) { lbl.style.background="#fdcb6e"; lbl.style.color="#fff"; }
-            else { lbl.style.background="#ff7675"; lbl.style.color="#fff"; }
-        }
-        document.getElementById('curW').innerText = appData.weight;
-        document.getElementById('tarW').innerText = appData.targetWeight;
-        
-        if(appData.targetWeight > 0) {
-             // Bar hesaplama (Basit görsel)
-             let progress = 100;
-             if(appData.weight > appData.targetWeight) progress = (appData.targetWeight / appData.weight) * 100;
-             document.getElementById('wProg').style.width = progress + "%";
+            if(bmi<18.5) { bmiLbl.style.background="#74b9ff"; bmiLbl.style.color="#fff"; }
+            else if(bmi<25) { bmiLbl.style.background="#00b894"; bmiLbl.style.color="#fff"; }
+            else if(bmi<30) { bmiLbl.style.background="#fdcb6e"; bmiLbl.style.color="#fff"; }
+            else { bmiLbl.style.background="#ff7675"; bmiLbl.style.color="#fff"; }
+        } else {
+            bmiLbl.innerText = "--";
+            bmiLbl.style.background="#dfe6e9"; bmiLbl.style.color="#636e72";
         }
 
-        if(appData.lastWeightUpdate) {
-            const diff = Math.ceil(Math.abs(new Date() - new Date(appData.lastWeightUpdate)) / 86400000);
-            document.getElementById('weightReminder').style.display = (diff > appData.weightFreq) ? 'block' : 'none';
+        document.getElementById('curW').innerText = appData.weight || "--";
+        document.getElementById('tarW').innerText = appData.targetWeight || "--";
+
+        if(appData.targetWeight > 0 && appData.weight > 0) {
+             let progress = 0;
+             // Kilo verme hedefi varsayımı
+             if(appData.weight > appData.targetWeight) {
+                 // Basit bir görselleştirme (Tam algoritma karmaşık olabilir)
+                 progress = 50; 
+             } else {
+                 progress = 100;
+             }
+             // Daha düzgün bir bar için sabit width verelim şimdilik
+             document.getElementById('wProg').style.width = "100%";
         }
-        saveToCloud(); renderTasks();
     }
 
-    function updateUI() {
-        document.getElementById('uHeight').value = appData.height || 0;
-        document.getElementById('uWeight').value = appData.weight || 0;
-        document.getElementById('uTarget').value = appData.targetWeight || 0;
-        document.getElementById('uFreq').value = appData.weightFreq || 7;
-        document.getElementById('dailySteps').value = appData.dailySteps || 0;
-        calculate(); renderHistory(); renderManage();
-    }
-    function updateWeightDate() { appData.lastWeightUpdate = new Date().toISOString().split('T')[0]; calculate(); }
-
+    // --- AKTİVİTE & LİSTE ---
     function addNewActivity() {
-        const n = document.getElementById('actName').value; const c = parseInt(document.getElementById('actCal').value); const l = document.getElementById('actLink').value;
+        const n = document.getElementById('actName').value;
+        const c = parseInt(document.getElementById('actCal').value);
+        const l = document.getElementById('actLink').value;
         if(n && c) {
             if(!appData.activities) appData.activities = [];
             appData.activities.push({id:Date.now(), name:n, cal:c, link:l, completed:false});
-            document.getElementById('actName').value=''; document.getElementById('actCal').value='';
-            updateUI(); alert(t('alert_added'));
+            document.getElementById('actName').value=''; 
+            document.getElementById('actCal').value='';
+            document.getElementById('actLink').value='';
+            
+            renderTasks();
+            renderManage();
+            calculateStats();
+            triggerSave(); // Kaydet
+            alert(langPack[appData.lang].alert_added);
         }
     }
-    function toggleTask(id) { const t = appData.activities.find(a=>a.id===id); if(t) { t.completed=!t.completed; calculate(); } }
-    function deleteTask(id) { if(confirm("Sil/Delete?")) { appData.activities=appData.activities.filter(a=>a.id!==id); updateUI(); } }
+
+    function toggleTask(id) {
+        const t = appData.activities.find(a=>a.id===id);
+        if(t) { 
+            t.completed = !t.completed; 
+            calculateStats(); 
+            triggerSave(); 
+            renderTasks(); // Checkbox görselini güncelle
+        }
+    }
+
+    function deleteTask(id) {
+        if(confirm("Silmek istediğine emin misin?")) {
+            appData.activities = appData.activities.filter(a=>a.id!==id);
+            renderTasks();
+            renderManage();
+            calculateStats();
+            triggerSave();
+        }
+    }
 
     function renderTasks() {
         const c = document.getElementById('taskList'); c.innerHTML = '';
@@ -593,32 +616,59 @@
             });
         }
     }
+
     function renderManage() {
         const c = document.getElementById('manageList'); c.innerHTML='';
         if(appData.activities) appData.activities.forEach(a => c.innerHTML += `<div class="task-row" style="padding:10px;"><span>${a.name}</span> <button onclick="deleteTask(${a.id})" style="margin-left:auto;color:#ff7675;background:none;border:none;">Sil</button></div>`);
     }
 
+    // --- GÜN SONU & GEÇMİŞ ---
     function checkNewDay() {
         const t = new Date().toLocaleDateString('tr-TR');
-        if(appData.lastDate !== t) { endDay(true); appData.lastDate = t; appData.dailySteps=0; if(appData.activities) appData.activities.forEach(a=>a.completed=false); saveToCloud(); alert(langPack[appData.lang].alert_newDay); }
+        if(appData.lastDate !== t) {
+            endDay(true); // Otomatik bitir
+            appData.lastDate = t;
+            saveToCloud();
+            alert(langPack[appData.lang].alert_newDay);
+        }
     }
+
     function endDay(auto=false) {
-        if(!auto && !confirm(t('endDay') + "?")) return;
+        if(!auto && !confirm(langPack[appData.lang].endDay + "?")) return;
+        
         const s = Math.round((appData.dailySteps || 0) * 0.04);
         let sp = 0; if(appData.activities) appData.activities.forEach(a => { if(a.completed) sp += a.cal; });
+        
         if(s+sp > 0) {
             if(!appData.history) appData.history = [];
             appData.history.unshift({date: appData.lastDate, total: s+sp, steps: appData.dailySteps});
-            if(!auto) { appData.dailySteps=0; appData.activities.forEach(a=>a.completed=false); }
-            saveToCloud(); updateUI();
+            
+            // Sıfırlama işlemi
+            appData.dailySteps = 0;
+            if(appData.activities) appData.activities.forEach(a=>a.completed=false);
+            
+            fillInputsFromData(); // Inputları da sıfırla!
+            calculateStats();
+            saveToCloud();
+            
+            if(!auto) alert("Gün arşivlendi!");
         }
     }
+
     function renderHistory() {
         const tb = document.querySelector('#historyTable tbody'); tb.innerHTML='';
         if(appData.history) appData.history.forEach(h => tb.innerHTML += `<tr style="border-bottom:1px solid var(--border);"><td style="padding:10px;">${h.date}</td><td>${h.steps}</td><td>${h.total}</td></tr>`);
     }
-    function clearHistory() { if(confirm("Clear?")) { appData.history=[]; saveToCloud(); updateUI(); } }
 
+    function clearHistory() { 
+        if(confirm("Tüm geçmişi sil?")) { 
+            appData.history=[]; 
+            renderHistory(); 
+            triggerSave(); 
+        } 
+    }
+
+    // --- NAVİGASYON ---
     function switchPage(id, el) {
         document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -628,50 +678,86 @@
         }
     }
 
-    // --- AYARLAR ---
-    function t(key) { return langPack[appData.lang || localLang][key]; }
+    // --- AYARLAR & DİL ---
+    const langPack = {
+        tr: {
+            loginSub: "Hedefine ulaş, sınırlarını zorla.",
+            emailPh: "E-posta Adresi", passPh: "Şifre",
+            loginBtn: "Devam Et →", regBtn: "Hesap Oluştur",
+            welcome_login: "Giriş Yap", welcome_reg: "Kayıt Ol",
+            menu_home: "Ana Sayfa", menu_add: "Ekle", menu_history: "Geçmiş", menu_profile: "Profil", menu_logout: "Çıkış Yap",
+            remind: "Tartılma zamanı geldi!",
+            bodyStat: "Vücut Durumu", cur: "Kilo", tar: "Hedef",
+            total: "Günlük Özet", step: "ADIM", sport: "SPOR",
+            todayWork: "Görevler", stepCount: "Hızlı Adım Girişi",
+            addAct: "Yeni Aktivite", actNamePh: "Ad (Örn: Yürüyüş)", actCalPh: "Kalori", addListBtn: "Listeye Ekle", myList: "Kayıtlı Aktivitelerim",
+            histTitle: "Geçmiş Kayıtlar", th_date: "Tarih", th_step: "Adım", th_cal: "Kcal", clearHist: "Temizle",
+            settings: "Profil Ayarları", lbl_height: "Boy (cm)", lbl_weight: "Güncel Kilo (kg)", lbl_target: "Hedef Kilo", lbl_freq: "Hatırlatma", saveBtn: "Ayarları Kaydet",
+            endDay: "Günü bitirip arşive kaldırır.", archBtn: "Günü Bitir",
+            alert_newDay: "☀️ Yeni bir gün başladı! İstatistikler sıfırlandı.", alert_saved: "✅ Kaydedildi!", alert_added: "✅ Eklendi!",
+            welcome_user: "Hoş geldin,"
+        },
+        en: {
+            loginSub: "Reach your goals, push your limits.",
+            emailPh: "Email Address", passPh: "Password",
+            loginBtn: "Continue →", regBtn: "Create Account",
+            welcome_login: "Login", welcome_reg: "Register",
+            menu_home: "Home", menu_add: "Add", menu_history: "History", menu_profile: "Profile", menu_logout: "Logout",
+            remind: "Time to weigh in!",
+            bodyStat: "Body Status", cur: "Weight", tar: "Target",
+            total: "Daily Summary", step: "STEPS", sport: "SPORT",
+            todayWork: "Today's Tasks", stepCount: "Step Entry",
+            addAct: "New Activity", actNamePh: "Name (e.g. Run)", actCalPh: "Calories", addListBtn: "Add to List", myList: "My Activities",
+            histTitle: "History Logs", th_date: "Date", th_step: "Steps", th_cal: "Kcal", clearHist: "Clear",
+            settings: "Profile Settings", lbl_height: "Height (cm)", lbl_weight: "Current Weight (kg)", lbl_target: "Target Weight", lbl_freq: "Reminder Freq", saveBtn: "Save Settings",
+            endDay: "Archive stats and end day.", archBtn: "End Day",
+            alert_newDay: "☀️ A new day has started! Stats reset.", alert_saved: "✅ Saved!", alert_added: "✅ Added!",
+            welcome_user: "Welcome,"
+        }
+    };
+
     function toggleLang() {
-        const c = (auth.currentUser) ? appData.lang : localLang;
+        const c = appData.lang || 'tr';
         const n = c === 'tr' ? 'en' : 'tr';
-        if(auth.currentUser) { appData.lang = n; saveToCloud(); } else { localLang = n; localStorage.setItem('localLang', n); }
-        applySettingsToDOM(n, (auth.currentUser ? appData.theme : localTheme)); updateUI();
+        appData.lang = n;
+        localStorage.setItem('localLang', n);
+        applySettingsToDOM(n, appData.theme);
+        triggerSave();
     }
+
     function toggleThemeGlobal() {
-        const c = (auth.currentUser) ? appData.theme : localTheme;
+        const c = appData.theme || 'light';
         const n = c === 'light' ? 'dark' : 'light';
-        if(auth.currentUser) { appData.theme = n; saveToCloud(); } else { localTheme = n; localStorage.setItem('localTheme', n); }
-        applySettingsToDOM((auth.currentUser ? appData.lang : localLang), n);
+        appData.theme = n;
+        localStorage.setItem('localTheme', n);
+        applySettingsToDOM(appData.lang, n);
+        triggerSave();
     }
+
     function applySettingsToDOM(l, th) {
         document.documentElement.setAttribute('data-theme', th);
         const p = langPack[l];
+        // Basit text güncellemeleri
         document.getElementById('txt_welcome').innerText = p.welcome_user;
         document.getElementById('langBtnLogin').innerText = l.toUpperCase();
         document.getElementById('langBtnApp').innerText = l.toUpperCase();
         document.getElementById('themeBtnLogin').innerText = th==='light'?'☀':'🌙';
         document.getElementById('themeBtnApp').innerText = th==='light'?'☀':'🌙';
-        
-        // Text Updates
         document.getElementById('txt_loginSub').innerText = p.loginSub;
         document.getElementById('email').placeholder = p.emailPh; document.getElementById('password').placeholder = p.passPh;
         document.getElementById('btn_welcome_login').innerText = p.welcome_login; document.getElementById('btn_welcome_reg').innerText = p.welcome_reg;
-        
         document.getElementById('menu_home').innerText = p.menu_home; document.getElementById('menu_add').innerText = p.menu_add;
         document.getElementById('menu_history').innerText = p.menu_history; document.getElementById('menu_profile').innerText = p.menu_profile;
         document.getElementById('menu_logout').innerText = p.menu_logout;
-        
         document.getElementById('txt_remind').innerText = p.remind; document.getElementById('txt_bodyStat').innerText = p.bodyStat;
         document.getElementById('txt_cur').innerText = p.cur; document.getElementById('txt_tar').innerText = p.tar;
         document.getElementById('txt_total').innerText = p.total; document.getElementById('txt_step').innerText = p.step; document.getElementById('txt_sport').innerText = p.sport;
         document.getElementById('txt_todayWork').innerText = p.todayWork; document.getElementById('txt_stepCount').innerText = p.stepCount;
-        
         document.getElementById('txt_addAct').innerText = p.addAct; document.getElementById('actName').placeholder = p.actNamePh; document.getElementById('actCal').placeholder = p.actCalPh;
         document.getElementById('btn_addList').innerText = p.addListBtn; document.getElementById('txt_myList').innerText = p.myList;
-        
         document.getElementById('txt_histTitle').innerText = p.histTitle; document.getElementById('th_date').innerText = p.th_date; document.getElementById('th_step').innerText = p.th_step; document.getElementById('th_cal').innerText = p.th_cal; document.getElementById('btn_clearHist').innerText = p.clearHist;
-        
         document.getElementById('txt_settings').innerText = p.settings; document.getElementById('lbl_height').innerText = p.lbl_height; document.getElementById('lbl_weight').innerText = p.lbl_weight; document.getElementById('lbl_target').innerText = p.lbl_target; document.getElementById('lbl_freq').innerText = p.lbl_freq;
-        document.getElementById('btn_save').innerText = p.saveBtn; document.getElementById('txt_endDay').innerText = p.endDay; document.getElementById('btn_archive').innerText = p.archBtn;
+        document.getElementById('txt_endDay').innerText = p.endDay; document.getElementById('btn_archive').innerText = p.archBtn;
     }
 </script>
 </body>
