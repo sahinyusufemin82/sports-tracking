@@ -2,225 +2,372 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FitTakip</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>FitTakip Pro</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
     <style>
-        /* --- CSS DEĞİŞKENLERİ (Tema Ayarları) --- */
-        :root { --primary: #007bff; --bg: #f4f7f6; --text: #333; --card-bg: #ffffff; --input-bg: #ffffff; --border: #ddd; --header-bg: #ffffff; }
-        [data-theme="dark"] { --primary: #37a0f4; --bg: #121212; --text: #e0e0e0; --card-bg: #1e1e1e; --input-bg: #2d2d2d; --border: #444; --header-bg: #1e1e1e; }
-
-        body { font-family: -apple-system, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; transition: background-color 0.3s, color 0.3s; }
-
-        /* BUTONLAR & KONTROLLER (Sağ Üst) */
-        .top-controls {
-            position: absolute; top: 15px; right: 15px; z-index: 1000;
-            display: flex; gap: 10px;
+        /* --- MODERN TEMA DEĞİŞKENLERİ --- */
+        :root {
+            --primary-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --accent: #FF6B6B;
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --text-main: #2d3436;
+            --text-sub: #636e72;
+            --border: #dfe6e9;
+            --shadow: 0 10px 20px rgba(0,0,0,0.05);
+            --radius: 20px;
+            --nav-height: 70px;
         }
-        .header-controls {
-            display: flex; gap: 8px; margin-left: auto;
+
+        [data-theme="dark"] {
+            --primary-grad: linear-gradient(135deg, #3a4b8a 0%, #462c63 100%);
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --text-main: #f5f6fa;
+            --text-sub: #b2bec3;
+            --border: #2d3436;
+            --shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0; padding: 0;
+            padding-bottom: calc(var(--nav-height) + 20px); /* Alt menü için boşluk */
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* --- BUTONLAR --- */
+        .btn-grad {
+            background-image: var(--primary-grad);
+            border: none; border-radius: 12px; color: white;
+            padding: 15px; width: 100%; font-size: 16px; font-weight: 600;
+            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .btn-grad:active { transform: scale(0.98); }
+        
+        .btn-outline {
+            background: transparent; border: 2px solid #764ba2;
+            color: #764ba2; border-radius: 12px; padding: 14px; width: 100%;
+            font-weight: 600; cursor: pointer;
+        }
+        [data-theme="dark"] .btn-outline { border-color: #a29bfe; color: #a29bfe; }
+
         .icon-btn {
-            background: rgba(128,128,128,0.15); border: 1px solid var(--border); cursor: pointer;
-            font-size: 16px; font-weight: bold; padding: 0; border-radius: 8px; width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center; transition: 0.2s; color: var(--text);
+            background: var(--surface); border: none; width: 40px; height: 40px;
+            border-radius: 50%; box-shadow: var(--shadow); color: var(--text-main);
+            font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-        .icon-btn:hover { background: rgba(128,128,128,0.3); }
 
-        /* GİRİŞ EKRANI */
+        /* --- GİRİŞ SAYFASI (Modern Landing) --- */
         #loginPage {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; padding: 20px; text-align: center; position: relative;
+            padding: 30px;
         }
-        .login-card {
-            background: var(--card-bg); padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 100%; max-width: 350px;
+        .login-hero {
+            background: var(--surface); padding: 40px 30px; border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px;
+            text-align: center; position: relative; overflow: hidden;
+        }
+        .login-hero::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px;
+            background: var(--primary-grad);
+        }
+        .app-logo { font-size: 50px; margin-bottom: 10px; display: block; }
+        .login-hero h1 { margin: 10px 0; font-size: 28px; color: var(--text-main); }
+        .login-hero p { color: var(--text-sub); margin-bottom: 30px; font-size: 14px; }
+        
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group input {
+            width: 100%; padding: 15px; border-radius: 12px;
+            border: 1px solid var(--border); background: var(--bg);
+            color: var(--text-main); font-family: inherit; outline: none;
             transition: 0.3s;
         }
-        .login-card h1 { margin-bottom: 5px; color: var(--text); }
-        .login-card h2 { margin-top: 0; color: var(--primary); }
-        
-        /* GİZLENEBİLİR ALANLAR */
-        #auth-forms { display: none; margin-top: 20px; }
-        #welcome-buttons { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; width: 100%; }
-        
-        .login-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; background: var(--input-bg); color: var(--text); box-sizing: border-box; }
-        
-        button.primary-btn { width: 100%; background-color: var(--primary); color: white; padding: 14px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        button.secondary-btn { width: 100%; background-color: transparent; border: 1px solid var(--border); color: var(--text); padding: 14px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
-        button.text-btn { background: none; border: none; color: var(--text); opacity: 0.7; cursor: pointer; margin-top: 10px; text-decoration: underline; font-size: 14px; }
+        .input-group input:focus { border-color: #764ba2; box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1); }
 
-        /* UYGULAMA İÇİ */
-        #appPage { display: none; }
-
-        /* HEADER & MENÜ */
-        header { 
-            background: var(--header-bg); padding: 10px 15px; display: flex; align-items: center; 
-            position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-            height: 50px;
+        /* --- ÜST HEADER --- */
+        header {
+            padding: 20px; display: flex; align-items: center; justify-content: space-between;
+            background: transparent; max-width: 600px; margin: 0 auto;
         }
-        .menu-btn { font-size: 24px; cursor: pointer; margin-right: 15px; background: none; border: none; color: var(--text); }
-        .app-title { font-weight: bold; font-size: 18px; color: var(--primary); margin: 0; }
-        
-        .sidebar { height: 100%; width: 260px; position: fixed; z-index: 200; top: 0; left: -270px; background-color: #343a40; transition: 0.3s; padding-top: 60px; }
-        .sidebar a { padding: 15px 25px; text-decoration: none; color: #f1f1f1; display: block; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .closebtn { position: absolute; top: 10px; right: 20px; font-size: 30px; color: white; background: none; border: none; cursor: pointer; }
-        .overlay { display: none; position: fixed; width: 100%; height: 100%; top: 0; left: 0; background: rgba(0,0,0,0.5); z-index: 150; }
-        
-        /* SAYFALAR & KARTLAR */
-        .page { display: none; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .header-title h2 { margin: 0; font-size: 24px; font-weight: 700; }
+        .header-title span { font-size: 12px; color: var(--text-sub); display: block; }
+
+        /* --- ALT MENÜ (Bottom Bar) --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height);
+            background: var(--surface);
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 500; border-top-left-radius: 25px; border-top-right-radius: 25px;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--text-sub); font-size: 10px; gap: 4px; text-decoration: none;
+            width: 25%; height: 100%; transition: 0.2s;
+        }
+        .nav-item i { font-size: 24px; font-style: normal; }
+        .nav-item.active { color: #764ba2; font-weight: 700; }
+        .nav-item.active i { transform: translateY(-3px); }
+        [data-theme="dark"] .nav-item.active { color: #a29bfe; }
+
+        /* --- SAYFALAR & KARTLAR --- */
+        .page { display: none; padding: 0 20px; max-width: 600px; margin: 0 auto; animation: fadeIn 0.4s ease; }
         .page.active { display: block; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card {
+            background: var(--surface); border-radius: var(--radius);
+            padding: 25px; margin-bottom: 20px;
+            box-shadow: var(--shadow); border: 1px solid var(--border);
+            position: relative; overflow: hidden;
+        }
+        .card h2 { margin-top: 0; font-size: 18px; display: flex; align-items: center; gap: 10px; }
         
-        /* WIDGETLAR */
-        .bmi-box { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.03); padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
-        .task-item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid var(--border); }
-        .progress-bar { height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; margin-top: 5px; }
-        .progress-fill { height: 100%; background: #28a745; width: 0%; transition: width 0.5s; }
-        .error-msg { color: #dc3545; font-size: 14px; margin-top: 10px; display: none; border: 1px solid #dc3545; padding: 10px; border-radius: 5px; background: rgba(220, 53, 69, 0.1); }
+        /* ÖZEL WIDGETLAR */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; text-align: center; }
+        .stat-box strong { font-size: 22px; display: block; color: #764ba2; }
+        [data-theme="dark"] .stat-box strong { color: #a29bfe; }
+        .stat-box small { color: var(--text-sub); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .progress-container { background: var(--bg); height: 12px; border-radius: 6px; overflow: hidden; margin-top: 15px; }
+        .progress-bar { height: 100%; background: var(--primary-grad); width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        .task-row {
+            display: flex; align-items: center; background: var(--bg);
+            padding: 15px; border-radius: 12px; margin-bottom: 10px;
+            transition: 0.2s;
+        }
+        .task-row:active { transform: scale(0.98); }
+        .checkbox {
+            width: 24px; height: 24px; border: 2px solid #764ba2; border-radius: 6px;
+            margin-right: 15px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        .checked .checkbox { background: #764ba2; }
+        .checked .checkbox::after { content: '✔'; color: white; font-size: 14px; }
+        .checked span { text-decoration: line-through; opacity: 0.5; }
+
+        /* HATA MESAJI */
+        .error-msg {
+            color: #ff6b6b; background: rgba(255, 107, 107, 0.1);
+            padding: 10px; border-radius: 8px; font-size: 13px; margin-top: 10px;
+            display: none; text-align: left;
+        }
+        
+        /* AYARLAR INPUTLARI */
+        .setting-row { margin-bottom: 15px; }
+        .setting-row label { display: block; font-size: 13px; color: var(--text-sub); margin-bottom: 5px; }
+        .setting-row input, .setting-row select {
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text-main); font-family: 'Poppins';
+        }
+
     </style>
 </head>
 <body>
 
     <div id="loginPage">
-        <div class="top-controls">
+        <div style="position: absolute; top:20px; right:20px; display:flex; gap:10px;">
             <button class="icon-btn" onclick="toggleLang()" id="langBtnLogin">TR</button>
             <button class="icon-btn" onclick="toggleThemeGlobal()" id="themeBtnLogin">☀</button>
         </div>
 
-        <div class="login-card">
-            <h1>FitTakip ☁️</h1>
-            <p id="txt_loginSub">Verilerin artık bulutta saklanıyor.</p>
-            
-            <div id="welcome-buttons">
-                <button class="primary-btn" onclick="showForm('login')" id="btn_welcome_login">Giriş Yap</button>
-                <button class="secondary-btn" onclick="showForm('register')" id="btn_welcome_reg">Kayıt Ol</button>
-            </div>
+        <div class="login-hero">
+            <span class="app-logo">🔥</span>
+            <h1>FitTakip Pro</h1>
+            <p id="txt_loginSub">Hedefine ulaş, sınırlarını zorla.</p>
 
-            <div id="auth-forms">
-                <h2 id="form-title">Giriş</h2>
-                <input type="email" id="email" placeholder="E-posta Adresi">
-                <input type="password" id="password" placeholder="Şifre">
+            <div id="auth-forms" style="display:none;">
+                <h3 id="form-title" style="text-align:left; margin-bottom:15px;">Giriş Yap</h3>
+                <div class="input-group"><input type="email" id="email" placeholder="E-posta"></div>
+                <div class="input-group"><input type="password" id="password" placeholder="Şifre"></div>
                 
                 <div id="loginError" class="error-msg"></div>
 
-                <button class="primary-btn" id="btn_action" onclick="performAuth()">Giriş Yap</button>
-                <button class="text-btn" onclick="goBack()" id="btn_back">← Geri Dön</button>
+                <button class="btn-grad" id="btn_action" onclick="performAuth()">Devam Et →</button>
+                <button onclick="goBack()" style="background:none; border:none; color:var(--text-sub); margin-top:15px; cursor:pointer;">İptal</button>
             </div>
 
-            <div style="margin-top:20px; font-size:12px; opacity:0.6;">FitTakip Global v10.0 (No Verify)</div>
+            <div id="welcome-buttons">
+                <button class="btn-grad" onclick="showForm('login')" id="btn_welcome_login">Giriş Yap</button>
+                <div style="height:15px;"></div>
+                <button class="btn-outline" onclick="showForm('register')" id="btn_welcome_reg">Hesap Oluştur</button>
+            </div>
         </div>
+        <p style="margin-top:20px; font-size:12px; color:var(--text-sub); opacity:0.5;">v11.0 Ultimate Design</p>
     </div>
 
     <div id="appPage">
-        <div id="overlay" class="overlay" onclick="closeNav()"></div>
-
-        <div id="mySidebar" class="sidebar">
-            <button class="closebtn" onclick="closeNav()">&times;</button>
-            <div style="text-align:center; padding: 20px; opacity:0.6; font-size: 12px;" id="txt_userTitle">KULLANICI</div>
-            <div style="text-align:center; padding-bottom: 20px; font-weight:bold; color:var(--primary);" id="userEmailDisplay">...</div>
-
-            <a href="#" onclick="switchPage('dashboard')">🏠 <span id="menu_home">Ana Sayfa</span></a>
-            <a href="#" onclick="switchPage('add-activity')">➕ <span id="menu_add">Aktivite Ekle</span></a>
-            <a href="#" onclick="switchPage('history')">📜 <span id="menu_history">Geçmiş</span></a>
-            <a href="#" onclick="switchPage('profile')">👤 <span id="menu_profile">Ayarlar</span></a>
-            <a href="#" onclick="cikisYap()" style="color:#dc3545; border-top:1px solid #555; margin-top:20px;">🚪 <span id="menu_logout">Çıkış Yap</span></a>
-        </div>
-
+        
         <header>
-            <button class="menu-btn" onclick="openNav()">&#9776;</button>
-            <p class="app-title">FitTakip</p>
-            <div class="header-controls">
+            <div class="header-title">
+                <span id="txt_welcome">Hoş geldin,</span>
+                <h2 id="userEmailShort">Kullanıcı</h2>
+            </div>
+            <div style="display:flex; gap:10px;">
                 <button class="icon-btn" onclick="toggleLang()" id="langBtnApp">TR</button>
                 <button class="icon-btn" onclick="toggleThemeGlobal()" id="themeBtnApp">☀</button>
             </div>
         </header>
 
         <div id="dashboard" class="page active">
-            <div id="weightReminder" class="card" style="background:#fff3cd; color:#856404; display:none; text-align:center; cursor:pointer;" onclick="switchPage('profile')">⚠️ <span id="txt_remind">Tartılma zamanı!</span></div>
             
-            <div class="card">
-                <h2 id="txt_bodyStat">Vücut Durumu</h2>
-                <div class="bmi-box">
-                    <div><small>BMI</small><br><strong id="bmiValue" style="font-size:24px; color:var(--primary);">--</strong></div>
-                    <div id="bmiLabel" style="padding:4px 8px; border-radius:4px; font-size:12px; color:white; background:#ccc;">--</div>
-                </div>
-                <div style="margin-top:10px;">
-                    <small><span id="txt_cur">Mevcut</span>: <b id="curW">--</b> | <span id="txt_tar">Hedef</span>: <b id="tarW">--</b></small>
-                    <div class="progress-bar"><div id="wProg" class="progress-fill"></div></div>
-                </div>
-            </div>
-
-            <div class="card" style="text-align:center;">
-                <div style="display:flex; justify-content:space-around;">
-                    <div><strong id="totalCal" style="font-size:20px; color:var(--primary);">0</strong><br><small id="txt_total">Toplam</small></div>
-                    <div><strong id="stepCal" style="font-size:20px; opacity:0.6;">0</strong><br><small id="txt_step">Adım</small></div>
-                    <div><strong id="sportCal" style="font-size:20px; opacity:0.6;">0</strong><br><small id="txt_sport">Spor</small></div>
+            <div id="weightReminder" class="card" style="background: linear-gradient(to right, #f6d365, #fda085); color:#fff; display:none; border:none;" onclick="switchPage('profile')">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:24px;">⚖️</span>
+                    <div>
+                        <strong style="display:block;">Hatırlatma</strong>
+                        <span id="txt_remind" style="font-size:13px; opacity:0.9;">Tartılma zamanı geldi!</span>
+                    </div>
                 </div>
             </div>
 
             <div class="card">
-                <h2 id="txt_todayWork">Bugünkü Antrenmanlar</h2>
+                <h2 id="txt_total">Günlük Özet 🔥</h2>
+                <div class="stat-grid">
+                    <div class="stat-box"><strong id="totalCal">0</strong><small>TOPLAM</small></div>
+                    <div class="stat-box"><strong id="stepCal">0</strong><small id="txt_step">ADIM</small></div>
+                    <div class="stat-box"><strong id="sportCal">0</strong><small id="txt_sport">SPOR</small></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2 style="margin:0;" id="txt_bodyStat">Durum</h2>
+                    <span id="bmiLabel" style="font-size:12px; padding:4px 10px; background:#dfe6e9; border-radius:10px; color:#636e72;">--</span>
+                </div>
+                <div style="margin-top:15px; display:flex; justify-content:space-between; font-size:14px;">
+                    <span><span id="txt_cur">Kilo</span>: <b id="curW">--</b></span>
+                    <span><span id="txt_tar">Hedef</span>: <b id="tarW">--</b></span>
+                </div>
+                <div class="progress-container"><div id="wProg" class="progress-bar"></div></div>
+            </div>
+
+            <div class="card">
+                <h2 id="txt_todayWork">Görevler</h2>
                 <div id="taskList"></div>
+                <div style="text-align:center; padding-top:10px; color:var(--text-sub); font-size:12px;">
+                    Aktivite eklemek için <b>+</b> butonuna bas.
+                </div>
             </div>
 
             <div class="card">
-                <h2 id="txt_stepCount">Adım Sayacı</h2>
-                <input type="number" id="dailySteps" placeholder="0" oninput="calculate()">
+                <h2 id="txt_stepCount">Hızlı Adım Girişi 👟</h2>
+                <div class="input-group">
+                    <input type="number" id="dailySteps" placeholder="Adım sayısı..." oninput="calculate()">
+                </div>
             </div>
         </div>
 
         <div id="add-activity" class="page">
             <div class="card">
-                <h2 id="txt_addAct">Aktivite Ekle</h2>
-                <input type="text" id="actName" placeholder="...">
-                <input type="url" id="actLink" placeholder="YouTube Link (Opsiyonel)">
-                <input type="number" id="actCal" placeholder="Kalori (kcal)">
-                <button class="primary-btn" onclick="addNewActivity()" id="btn_addList">Listeme Ekle</button>
+                <h2 id="txt_addAct">Yeni Aktivite ⚡</h2>
+                <div class="setting-row">
+                    <label>Aktivite Adı</label>
+                    <input type="text" id="actName" placeholder="Örn: Koşu, Yüzme...">
+                </div>
+                <div class="setting-row">
+                    <label>Kalori Değeri (kcal)</label>
+                    <input type="number" id="actCal" placeholder="0">
+                </div>
+                <div class="setting-row">
+                    <label>Video Linki (Opsiyonel)</label>
+                    <input type="url" id="actLink" placeholder="YouTube...">
+                </div>
+                <button class="btn-grad" onclick="addNewActivity()" id="btn_addList">Listeye Ekle</button>
             </div>
+
             <div class="card">
-                <h2 id="txt_myList">Listem</h2>
+                <h2 id="txt_myList">Kayıtlı Aktivitelerim</h2>
                 <div id="manageList"></div>
             </div>
         </div>
 
         <div id="history" class="page">
             <div class="card">
-                <h2 id="txt_histTitle">Geçmiş</h2>
-                <table width="100%" id="historyTable" style="text-align:left;">
-                    <thead><th id="th_date">Tarih</th><th id="th_step">Adım</th><th id="th_cal">Kcal</th></thead>
-                    <tbody></tbody>
+                <h2 id="txt_histTitle">Geçmiş Kayıtlar 📜</h2>
+                <table width="100%" id="historyTable" style="text-align:left; border-collapse:collapse; margin-top:10px;">
+                    <thead style="border-bottom:2px solid var(--border); color:var(--text-sub); font-size:12px;">
+                        <th style="padding:10px;" id="th_date">Tarih</th>
+                        <th id="th_step">Adım</th>
+                        <th id="th_cal">Kcal</th>
+                    </thead>
+                    <tbody style="font-size:14px;"></tbody>
                 </table>
-                <button class="primary-btn" style="background:#6c757d; margin-top:20px;" onclick="clearHistory()" id="btn_clearHist">Geçmişi Sil</button>
+                <button onclick="clearHistory()" id="btn_clearHist" style="width:100%; margin-top:20px; background:#ff7675; color:white; border:none; padding:10px; border-radius:8px;">Temizle</button>
             </div>
         </div>
 
         <div id="profile" class="page">
             <div class="card">
-                <h2 id="txt_settings">Ayarlar</h2>
-                <label id="lbl_height">Boy (cm)</label><input type="number" id="uHeight" onchange="calculate()">
-                <label id="lbl_weight">Kilo (kg)</label><input type="number" id="uWeight" onchange="updateWeightDate()">
-                <label id="lbl_target">Hedef Kilo</label><input type="number" id="uTarget" onchange="saveToCloud()">
-                <label id="lbl_freq">Hatırlatma Sıklığı</label>
-                <select id="uFreq" onchange="saveToCloud()">
-                    <option value="7">7 Gün</option>
-                    <option value="30">30 Gün</option>
-                </select>
-                <button class="primary-btn" onclick="saveToCloud(); alert(t('saved'));" id="btn_save">Kaydet</button>
+                <h2 id="txt_settings">Profil Ayarları ⚙️</h2>
+                
+                <div class="setting-row">
+                    <label id="lbl_height">Boy (cm)</label>
+                    <input type="number" id="uHeight" onchange="calculate()">
+                </div>
+                <div class="setting-row">
+                    <label id="lbl_weight">Güncel Kilo (kg)</label>
+                    <input type="number" id="uWeight" onchange="updateWeightDate()">
+                </div>
+                <div class="setting-row">
+                    <label id="lbl_target">Hedef Kilo (kg)</label>
+                    <input type="number" id="uTarget" onchange="saveToCloud()">
+                </div>
+                <div class="setting-row">
+                    <label id="lbl_freq">Tartılma Hatırlatıcısı</label>
+                    <select id="uFreq" onchange="saveToCloud()">
+                        <option value="7">Haftada 1</option>
+                        <option value="30">Ayda 1</option>
+                    </select>
+                </div>
+
+                <button class="btn-grad" onclick="saveToCloud(); alert(t('alert_saved'));" id="btn_save">Ayarları Kaydet</button>
             </div>
-            <div class="card">
-                <h2 id="txt_endDay">Günü Bitir</h2>
-                <button class="primary-btn" style="background:#ff9800;" onclick="endDay()" id="btn_archive">Günü Arşivle</button>
+
+            <div class="card" style="border:1px solid #ff7675;">
+                <h2 style="color:#ff7675;">Oturum</h2>
+                <p id="txt_endDay" style="font-size:13px; color:var(--text-sub);">Günü bitirip istatistikleri arşive kaldırır.</p>
+                <button class="btn-outline" style="border-color:#ff7675; color:#ff7675;" onclick="endDay()" id="btn_archive">Günü Bitir</button>
+                <div style="height:10px;"></div>
+                <button class="btn-outline" style="border-color:#636e72; color:#636e72;" onclick="cikisYap()" id="menu_logout">Çıkış Yap</button>
             </div>
         </div>
+
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active" onclick="switchPage('dashboard', this)">
+                <i>🏠</i> <span id="menu_home">Ana Sayfa</span>
+            </a>
+            <a href="#" class="nav-item" onclick="switchPage('add-activity', this)">
+                <i>⚡</i> <span id="menu_add">Ekle</span>
+            </a>
+            <a href="#" class="nav-item" onclick="switchPage('history', this)">
+                <i>📅</i> <span id="menu_history">Geçmiş</span>
+            </a>
+            <a href="#" class="nav-item" onclick="switchPage('profile', this)">
+                <i>👤</i> <span id="menu_profile">Profil</span>
+            </a>
+        </nav>
+
     </div>
 
 <script>
-    // --- FIREBASE AYARLARI ---
+    // --- FIREBASE KONFİGÜRASYONU ---
     const firebaseConfig = {
       apiKey: "AIzaSyB656zs8jf-Pib4nDGjzm81EDYsK8WL-Xc",
       authDomain: "fittakipp.firebaseapp.com",
@@ -235,59 +382,50 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // --- DİL PAKETİ (TR/EN) ---
+    // --- DİL PAKETİ ---
     const langPack = {
         tr: {
-            loginSub: "Verilerin artık bulutta saklanıyor.",
-            emailPh: "E-posta Adresi",
-            passPh: "Şifre",
-            loginBtn: "Giriş Yap",
-            regBtn: "Kayıt Ol",
-            backBtn: "← Geri Dön",
-            welcome_login: "Giriş Yap",
-            welcome_reg: "Kayıt Ol",
+            loginSub: "Hedefine ulaş, sınırlarını zorla.",
+            emailPh: "E-posta Adresi", passPh: "Şifre",
+            loginBtn: "Devam Et →", regBtn: "Hesap Oluştur",
+            welcome_login: "Giriş Yap", welcome_reg: "Kayıt Ol",
             
-            menu_home: "Ana Sayfa", menu_add: "Aktivite Ekle", menu_history: "Geçmiş", menu_profile: "Ayarlar", menu_logout: "Çıkış Yap",
-            remind: "⚠️ Tartılma zamanı!",
-            bodyStat: "Vücut Durumu", cur: "Mevcut", tar: "Hedef",
-            total: "Toplam", step: "Adım", sport: "Spor",
-            todayWork: "Bugünkü Antrenmanlar", stepCount: "Adım Sayacı",
-            addAct: "Aktivite Ekle", actNamePh: "Ad (Örn: Yürüyüş)", actCalPh: "Kalori", addListBtn: "Listeme Ekle", myList: "Listem",
-            histTitle: "Geçmiş", th_date: "Tarih", th_step: "Adım", th_cal: "Kcal", clearHist: "Geçmişi Sil",
-            settings: "Ayarlar", lbl_height: "Boy (cm)", lbl_weight: "Kilo (kg)", lbl_target: "Hedef Kilo", lbl_freq: "Hatırlatma Sıklığı", saveBtn: "Kaydet",
-            endDay: "Günü Bitir", archBtn: "Günü Arşivle",
+            menu_home: "Ana Sayfa", menu_add: "Ekle", menu_history: "Geçmiş", menu_profile: "Profil", menu_logout: "Çıkış Yap",
+            remind: "Tartılma zamanı geldi!",
+            bodyStat: "Vücut Durumu", cur: "Kilo", tar: "Hedef",
+            total: "Günlük Özet", step: "ADIM", sport: "SPOR",
+            todayWork: "Görevler", stepCount: "Hızlı Adım Girişi",
+            addAct: "Yeni Aktivite", actNamePh: "Ad (Örn: Yürüyüş)", actCalPh: "Kalori", addListBtn: "Listeye Ekle", myList: "Kayıtlı Aktivitelerim",
+            histTitle: "Geçmiş Kayıtlar", th_date: "Tarih", th_step: "Adım", th_cal: "Kcal", clearHist: "Temizle",
+            settings: "Profil Ayarları", lbl_height: "Boy (cm)", lbl_weight: "Güncel Kilo (kg)", lbl_target: "Hedef Kilo", lbl_freq: "Hatırlatma", saveBtn: "Ayarları Kaydet",
+            endDay: "Günü bitirip arşive kaldırır.", archBtn: "Günü Bitir",
             
-            alert_newDay: "Yeni bir gün başladı!", alert_saved: "Kaydedildi!", alert_added: "Eklendi!",
-            alert_reg_success: "Kayıt Başarılı! Otomatik giriş yapılıyor...",
-            lbl_normal: "Normal", lbl_over: "Fazla", lbl_obese: "Obez", lbl_weak: "Zayıf"
+            alert_newDay: "☀️ Yeni bir gün başladı! İstatistikler sıfırlandı.", alert_saved: "✅ Kaydedildi!", alert_added: "✅ Eklendi!",
+            lbl_normal: "Normal", lbl_over: "Fazla", lbl_obese: "Obez", lbl_weak: "Zayıf",
+            welcome_user: "Hoş geldin,"
         },
         en: {
-            loginSub: "Your data is now stored in the cloud.",
-            emailPh: "Email Address",
-            passPh: "Password",
-            loginBtn: "Login",
-            regBtn: "Register",
-            backBtn: "← Back",
-            welcome_login: "Login",
-            welcome_reg: "Register",
+            loginSub: "Reach your goals, push your limits.",
+            emailPh: "Email Address", passPh: "Password",
+            loginBtn: "Continue →", regBtn: "Create Account",
+            welcome_login: "Login", welcome_reg: "Register",
 
-            menu_home: "Dashboard", menu_add: "Add Activity", menu_history: "History", menu_profile: "Settings", menu_logout: "Logout",
-            remind: "⚠️ Time to weigh in!",
-            bodyStat: "Body Stats", cur: "Current", tar: "Target",
-            total: "Total", step: "Steps", sport: "Sport",
-            todayWork: "Today's Workouts", stepCount: "Step Counter",
-            addAct: "Add Activity", actNamePh: "Name (e.g. Walking)", actCalPh: "Calories", addListBtn: "Add to List", myList: "My List",
-            histTitle: "History", th_date: "Date", th_step: "Steps", th_cal: "Kcal", clearHist: "Clear History",
-            settings: "Settings", lbl_height: "Height (cm)", lbl_weight: "Weight (kg)", lbl_target: "Target Weight", lbl_freq: "Reminder Freq", saveBtn: "Save",
-            endDay: "End Day", archBtn: "Archive Day",
+            menu_home: "Home", menu_add: "Add", menu_history: "History", menu_profile: "Profile", menu_logout: "Logout",
+            remind: "Time to weigh in!",
+            bodyStat: "Body Status", cur: "Weight", tar: "Target",
+            total: "Daily Summary", step: "STEPS", sport: "SPORT",
+            todayWork: "Today's Tasks", stepCount: "Step Entry",
+            addAct: "New Activity", actNamePh: "Name (e.g. Run)", actCalPh: "Calories", addListBtn: "Add to List", myList: "My Activities",
+            histTitle: "History Logs", th_date: "Date", th_step: "Steps", th_cal: "Kcal", clearHist: "Clear",
+            settings: "Profile Settings", lbl_height: "Height (cm)", lbl_weight: "Current Weight (kg)", lbl_target: "Target Weight", lbl_freq: "Reminder Freq", saveBtn: "Save Settings",
+            endDay: "Archive stats and end day.", archBtn: "End Day",
             
-            alert_newDay: "A new day has started!", alert_saved: "Saved!", alert_added: "Added!",
-            alert_reg_success: "Registration Successful! Logging in...",
-            lbl_normal: "Normal", lbl_over: "Overweight", lbl_obese: "Obese", lbl_weak: "Underweight"
+            alert_newDay: "☀️ A new day has started! Stats reset.", alert_saved: "✅ Saved!", alert_added: "✅ Added!",
+            lbl_normal: "Normal", lbl_over: "Overweight", lbl_obese: "Obese", lbl_weak: "Underweight",
+            welcome_user: "Welcome,"
         }
     };
 
-    // --- VARSAYILAN VERİ ---
     const defaultData = {
         activities: [], history: [],
         weight: 0, height: 0, targetWeight: 0, weightFreq: 7, lastWeightUpdate: null,
@@ -300,41 +438,29 @@
     let localTheme = localStorage.getItem('localTheme') || 'light';
     let authMode = 'login'; 
 
-    window.onload = function() {
-        applySettingsToDOM(localLang, localTheme);
-    };
+    window.onload = function() { applySettingsToDOM(localLang, localTheme); };
 
-    // --- ARAYÜZ YÖNETİMİ ---
+    // --- UI FONKSİYONLARI ---
     function showForm(mode) {
         authMode = mode;
         const p = langPack[localLang];
         document.getElementById('form-title').innerText = (mode === 'login') ? p.welcome_login : p.welcome_reg;
-        document.getElementById('btn_action').innerText = (mode === 'login') ? p.loginBtn : p.regBtn;
-        
+        document.getElementById('btn_action').innerText = p.loginBtn;
         document.getElementById('welcome-buttons').style.display = 'none';
         document.getElementById('auth-forms').style.display = 'block';
         document.getElementById('loginError').style.display = 'none';
     }
-
     function goBack() {
         document.getElementById('auth-forms').style.display = 'none';
-        document.getElementById('welcome-buttons').style.display = 'flex';
-        document.getElementById('loginError').style.display = 'none';
+        document.getElementById('welcome-buttons').style.display = 'block';
         document.getElementById('password').value = '';
     }
 
-    function performAuth() {
-        if(authMode === 'login') girisYap();
-        else kayitOl();
-    }
-
-    // --- OTURUM YÖNETİMİ (MAİL ONAYI KALDIRILDI) ---
+    // --- AUTH ---
     auth.onAuthStateChanged(user => {
         if (user) {
-            // ARTIK KONTROL YOK, DİREKT İÇERİ AL
             enterApp(user);
         } else {
-            // Çıkış yapmış
             document.getElementById('loginPage').style.display = 'flex';
             document.getElementById('appPage').style.display = 'none';
         }
@@ -343,173 +469,53 @@
     function girisYap() {
         const e = document.getElementById('email').value;
         const p = document.getElementById('password').value;
-        // Düz giriş, hata varsa göster
         auth.signInWithEmailAndPassword(e, p).catch(err => showError(err.message));
     }
-
-    function enterApp(user) {
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('appPage').style.display = 'block';
-        document.getElementById('userEmailDisplay').innerText = user.email;
-        loadFromCloud(user.uid);
-    }
-
     function kayitOl() {
         const e = document.getElementById('email').value;
         const p = document.getElementById('password').value;
-        appData = JSON.parse(JSON.stringify(defaultData)); 
-        appData.lang = localLang;
-        appData.theme = localTheme;
-
-        auth.createUserWithEmailAndPassword(e, p).then((cred) => {
-            saveToCloud(cred.user.uid); 
-            // Mail gönderme yok, direkt başarılı de
-            // (Otomatik onAuthStateChanged tetiklenecek ve içeri alacak)
-            console.log("Kayıt başarılı");
-        }).catch(err => showError(err.message));
+        appData = JSON.parse(JSON.stringify(defaultData)); appData.lang = localLang; appData.theme = localTheme;
+        auth.createUserWithEmailAndPassword(e, p).then((cred) => { saveToCloud(cred.user.uid); }).catch(err => showError(err.message));
+    }
+    function performAuth() { if(authMode === 'login') girisYap(); else kayitOl(); }
+    function cikisYap() { auth.signOut().then(() => location.reload()); }
+    
+    function enterApp(user) {
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('appPage').style.display = 'block';
+        document.getElementById('userEmailShort').innerText = user.email.split('@')[0];
+        loadFromCloud(user.uid);
+    }
+    
+    function showError(msg) {
+        const errBox = document.getElementById('loginError'); errBox.style.display = 'block';
+        if (msg.includes('email-already-in-use')) errBox.innerHTML = "⚠️ E-posta zaten kullanımda.";
+        else if (msg.includes('wrong-password')) errBox.innerText = "⚠️ Hatalı şifre.";
+        else if (msg.includes('user-not-found')) errBox.innerText = "⚠️ Kullanıcı bulunamadı.";
+        else if (msg.includes('weak-password')) errBox.innerText = "⚠️ Şifre çok zayıf.";
+        else errBox.innerText = "Hata: " + msg;
     }
 
-    function cikisYap() { 
-        auth.signOut().then(() => {
-            location.reload(); 
-        });
-    }
-
-    function showError(msg) { 
-        const errBox = document.getElementById('loginError');
-        errBox.style.display = 'block';
-        
-        if (msg.includes('email-already-in-use')) {
-            errBox.innerHTML = "⚠️ <b>Bu e-posta zaten kayıtlı!</b><br>Lütfen geri dönüp <b>'Giriş Yap'</b> butonunu kullan.";
-        } else if (msg.includes('wrong-password')) {
-            errBox.innerText = "Hatalı şifre.";
-        } else if (msg.includes('user-not-found')) {
-            errBox.innerText = "Böyle bir kullanıcı yok.";
-        } else if (msg.includes('invalid-email')) {
-            errBox.innerText = "Geçersiz e-posta formatı.";
-        } else if (msg.includes('weak-password')) {
-            errBox.innerText = "Şifre çok zayıf (En az 6 karakter).";
-        } else {
-            errBox.innerText = "Hata: " + msg;
-        }
-    }
-
-    // --- DİL VE TEMA MOTORU ---
-    function t(key) { return langPack[appData.lang || localLang][key]; }
-
-    function toggleLang() {
-        const current = (auth.currentUser) ? appData.lang : localLang;
-        const newLang = current === 'tr' ? 'en' : 'tr';
-        
-        if(auth.currentUser) { appData.lang = newLang; saveToCloud(); }
-        else { localLang = newLang; localStorage.setItem('localLang', newLang); }
-        
-        applySettingsToDOM(newLang, (auth.currentUser ? appData.theme : localTheme));
-        updateUI(); 
-        if(document.getElementById('loginPage').style.display !== 'none') {
-             if(authMode) showForm(authMode);
-        }
-    }
-
-    function toggleThemeGlobal() {
-        const current = (auth.currentUser) ? appData.theme : localTheme;
-        const newTheme = current === 'light' ? 'dark' : 'light';
-        
-        if(auth.currentUser) { appData.theme = newTheme; saveToCloud(); }
-        else { localTheme = newTheme; localStorage.setItem('localTheme', newTheme); }
-
-        applySettingsToDOM((auth.currentUser ? appData.lang : localLang), newTheme);
-    }
-
-    function applySettingsToDOM(l, th) {
-        document.documentElement.setAttribute('data-theme', th);
-        
-        const langTxt = l.toUpperCase();
-        const themeIcon = th === 'light' ? '☀' : '🌙';
-        
-        document.getElementById('langBtnLogin').innerText = langTxt;
-        document.getElementById('langBtnApp').innerText = langTxt;
-        document.getElementById('themeBtnLogin').innerText = themeIcon;
-        document.getElementById('themeBtnApp').innerText = themeIcon;
-
-        const p = langPack[l];
-        document.getElementById('txt_loginSub').innerText = p.loginSub;
-        document.getElementById('email').placeholder = p.emailPh;
-        document.getElementById('password').placeholder = p.passPh;
-        document.getElementById('btn_back').innerText = p.backBtn;
-        document.getElementById('btn_welcome_login').innerText = p.welcome_login;
-        document.getElementById('btn_welcome_reg').innerText = p.welcome_reg;
-        
-        document.getElementById('txt_userTitle').innerText = (l==='tr'?'KULLANICI':'USER');
-        document.getElementById('menu_home').innerText = p.menu_home;
-        document.getElementById('menu_add').innerText = p.menu_add;
-        document.getElementById('menu_history').innerText = p.menu_history;
-        document.getElementById('menu_profile').innerText = p.menu_profile;
-        document.getElementById('menu_logout').innerText = p.menu_logout;
-        
-        document.getElementById('txt_remind').innerText = p.remind;
-        document.getElementById('txt_bodyStat').innerText = p.bodyStat;
-        document.getElementById('txt_cur').innerText = p.cur;
-        document.getElementById('txt_tar').innerText = p.tar;
-        document.getElementById('txt_total').innerText = p.total;
-        document.getElementById('txt_step').innerText = p.step;
-        document.getElementById('txt_sport').innerText = p.sport;
-        document.getElementById('txt_todayWork').innerText = p.todayWork;
-        document.getElementById('txt_stepCount').innerText = p.stepCount;
-        
-        document.getElementById('txt_addAct').innerText = p.addAct;
-        document.getElementById('actName').placeholder = p.actNamePh;
-        document.getElementById('actCal').placeholder = p.actCalPh;
-        document.getElementById('btn_addList').innerText = p.addListBtn;
-        document.getElementById('txt_myList').innerText = p.myList;
-        
-        document.getElementById('txt_histTitle').innerText = p.histTitle;
-        document.getElementById('th_date').innerText = p.th_date;
-        document.getElementById('th_step').innerText = p.th_step;
-        document.getElementById('th_cal').innerText = p.th_cal;
-        document.getElementById('btn_clearHist').innerText = p.clearHist;
-        
-        document.getElementById('txt_settings').innerText = p.settings;
-        document.getElementById('lbl_height').innerText = p.lbl_height;
-        document.getElementById('lbl_weight').innerText = p.lbl_weight;
-        document.getElementById('lbl_target').innerText = p.lbl_target;
-        document.getElementById('lbl_freq').innerText = p.lbl_freq;
-        document.getElementById('btn_save').innerText = p.saveBtn;
-        document.getElementById('txt_endDay').innerText = p.endDay;
-        document.getElementById('btn_archive').innerText = p.archBtn;
-    }
-
-    // --- DATABASE ---
+    // --- LOGIC ---
     function saveToCloud(uid = null) {
         const user = auth.currentUser;
-        const targetId = uid || (user ? user.uid : null);
-        if(targetId) {
-            db.collection('users').doc(targetId).set(appData)
-            .catch(e => console.error("Hata", e));
-        }
+        if(uid || user) db.collection('users').doc(uid || user.uid).set(appData).catch(e=>console.log(e));
     }
-
     function loadFromCloud(uid) {
         db.collection('users').doc(uid).get().then(doc => {
             if (doc.exists) {
                 appData = doc.data();
                 if(!appData.lang) appData.lang = 'tr';
-                if(!appData.theme) appData.theme = 'light';
-                
                 applySettingsToDOM(appData.lang, appData.theme);
                 updateUI();
                 checkNewDay();
             } else {
                 appData = JSON.parse(JSON.stringify(defaultData));
-                saveToCloud(uid);
-                updateUI();
+                saveToCloud(uid); updateUI();
             }
         });
     }
 
-    // --- UYGULAMA MANTIĞI ---
-    function updateWeightDate() { appData.lastWeightUpdate = new Date().toISOString().split('T')[0]; calculate(); }
-    
     function calculate() {
         appData.dailySteps = parseInt(document.getElementById('dailySteps').value) || 0;
         appData.height = parseFloat(document.getElementById('uHeight').value) || 0;
@@ -527,26 +533,30 @@
         if(appData.height > 0 && appData.weight > 0) {
             const h = appData.height/100;
             const bmi = (appData.weight / (h*h)).toFixed(1);
-            document.getElementById('bmiValue').innerText = bmi;
             const lbl = document.getElementById('bmiLabel');
             const p = langPack[appData.lang || localLang];
             
-            if(bmi<18.5) { lbl.innerText=p.lbl_weak; lbl.style.background="#17a2b8"; }
-            else if(bmi<25) { lbl.innerText=p.lbl_normal; lbl.style.background="#28a745"; }
-            else if(bmi<30) { lbl.innerText=p.lbl_over; lbl.style.background="#ffc107"; }
-            else { lbl.innerText=p.lbl_obese; lbl.style.background="#dc3545"; }
+            lbl.innerText = "BMI: " + bmi;
+            if(bmi<18.5) { lbl.style.background="#74b9ff"; lbl.style.color="#fff"; }
+            else if(bmi<25) { lbl.style.background="#00b894"; lbl.style.color="#fff"; }
+            else if(bmi<30) { lbl.style.background="#fdcb6e"; lbl.style.color="#fff"; }
+            else { lbl.style.background="#ff7675"; lbl.style.color="#fff"; }
         }
         document.getElementById('curW').innerText = appData.weight;
         document.getElementById('tarW').innerText = appData.targetWeight;
-        if(appData.targetWeight > 0) document.getElementById('wProg').style.width = "100%";
+        
+        if(appData.targetWeight > 0) {
+             // Bar hesaplama (Basit görsel)
+             let progress = 100;
+             if(appData.weight > appData.targetWeight) progress = (appData.targetWeight / appData.weight) * 100;
+             document.getElementById('wProg').style.width = progress + "%";
+        }
 
         if(appData.lastWeightUpdate) {
             const diff = Math.ceil(Math.abs(new Date() - new Date(appData.lastWeightUpdate)) / 86400000);
             document.getElementById('weightReminder').style.display = (diff > appData.weightFreq) ? 'block' : 'none';
         }
-        
-        saveToCloud();
-        renderTasks();
+        saveToCloud(); renderTasks();
     }
 
     function updateUI() {
@@ -555,15 +565,12 @@
         document.getElementById('uTarget').value = appData.targetWeight || 0;
         document.getElementById('uFreq').value = appData.weightFreq || 7;
         document.getElementById('dailySteps').value = appData.dailySteps || 0;
-        calculate();
-        renderHistory();
-        renderManage();
+        calculate(); renderHistory(); renderManage();
     }
+    function updateWeightDate() { appData.lastWeightUpdate = new Date().toISOString().split('T')[0]; calculate(); }
 
     function addNewActivity() {
-        const n = document.getElementById('actName').value;
-        const c = parseInt(document.getElementById('actCal').value);
-        const l = document.getElementById('actLink').value;
+        const n = document.getElementById('actName').value; const c = parseInt(document.getElementById('actCal').value); const l = document.getElementById('actLink').value;
         if(n && c) {
             if(!appData.activities) appData.activities = [];
             appData.activities.push({id:Date.now(), name:n, cal:c, link:l, completed:false});
@@ -571,37 +578,30 @@
             updateUI(); alert(t('alert_added'));
         }
     }
-    
-    function toggleTask(id) {
-        const t = appData.activities.find(a=>a.id===id);
-        if(t) { t.completed=!t.completed; calculate(); }
-    }
-    
-    function deleteTask(id) {
-        if(confirm("Sil/Delete?")) { appData.activities=appData.activities.filter(a=>a.id!==id); updateUI(); }
-    }
+    function toggleTask(id) { const t = appData.activities.find(a=>a.id===id); if(t) { t.completed=!t.completed; calculate(); } }
+    function deleteTask(id) { if(confirm("Sil/Delete?")) { appData.activities=appData.activities.filter(a=>a.id!==id); updateUI(); } }
 
     function renderTasks() {
         const c = document.getElementById('taskList'); c.innerHTML = '';
         if(appData.activities) {
             appData.activities.forEach(a => {
-                c.innerHTML += `<div class="task-item"><input type="checkbox" ${a.completed?'checked':''} onchange="toggleTask(${a.id})" style="width:20px;margin-right:10px;"><div><b>${a.name}</b> (${a.cal} kcal) ${a.link ? `<a href="${a.link}" target="_blank">▶</a>`:''}</div></div>`;
+                c.innerHTML += `<div class="task-row ${a.completed?'checked':''}" onclick="toggleTask(${a.id})">
+                <div class="checkbox"></div>
+                <div style="flex:1;"><span>${a.name}</span> <small style="color:var(--text-sub);">(${a.cal} kcal)</small></div>
+                ${a.link ? `<a href="${a.link}" target="_blank" onclick="event.stopPropagation()">🎬</a>`:''}
+                </div>`;
             });
         }
     }
-
     function renderManage() {
         const c = document.getElementById('manageList'); c.innerHTML='';
-        if(appData.activities) {
-            appData.activities.forEach(a => c.innerHTML += `<div class="task-item"><span>${a.name}</span> <button onclick="deleteTask(${a.id})" style="margin-left:auto;background:#dc3545;color:white;border:none;border-radius:4px;">X</button></div>`);
-        }
+        if(appData.activities) appData.activities.forEach(a => c.innerHTML += `<div class="task-row" style="padding:10px;"><span>${a.name}</span> <button onclick="deleteTask(${a.id})" style="margin-left:auto;color:#ff7675;background:none;border:none;">Sil</button></div>`);
     }
 
     function checkNewDay() {
         const t = new Date().toLocaleDateString('tr-TR');
-        if(appData.lastDate !== t) { endDay(true); appData.lastDate = t; appData.dailySteps=0; if(appData.activities) appData.activities.forEach(a=>a.completed=false); saveToCloud(); alert(t('alert_newDay')); }
+        if(appData.lastDate !== t) { endDay(true); appData.lastDate = t; appData.dailySteps=0; if(appData.activities) appData.activities.forEach(a=>a.completed=false); saveToCloud(); alert(langPack[appData.lang].alert_newDay); }
     }
-
     function endDay(auto=false) {
         if(!auto && !confirm(t('endDay') + "?")) return;
         const s = Math.round((appData.dailySteps || 0) * 0.04);
@@ -613,19 +613,66 @@
             saveToCloud(); updateUI();
         }
     }
-
     function renderHistory() {
         const tb = document.querySelector('#historyTable tbody'); tb.innerHTML='';
-        if(appData.history) {
-            appData.history.forEach(h => tb.innerHTML += `<tr><td>${h.date}</td><td>${h.steps}</td><td>${h.total}</td></tr>`);
-        }
+        if(appData.history) appData.history.forEach(h => tb.innerHTML += `<tr style="border-bottom:1px solid var(--border);"><td style="padding:10px;">${h.date}</td><td>${h.steps}</td><td>${h.total}</td></tr>`);
     }
     function clearHistory() { if(confirm("Clear?")) { appData.history=[]; saveToCloud(); updateUI(); } }
 
-    function openNav() { document.getElementById("mySidebar").style.left = "0"; document.getElementById("overlay").style.display="block"; }
-    function closeNav() { document.getElementById("mySidebar").style.left = "-270px"; document.getElementById("overlay").style.display="none"; }
-    function switchPage(id) { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.getElementById(id).classList.add('active'); closeNav(); }
+    function switchPage(id, el) {
+        document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(el) {
+            document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+            el.classList.add('active');
+        }
+    }
 
+    // --- AYARLAR ---
+    function t(key) { return langPack[appData.lang || localLang][key]; }
+    function toggleLang() {
+        const c = (auth.currentUser) ? appData.lang : localLang;
+        const n = c === 'tr' ? 'en' : 'tr';
+        if(auth.currentUser) { appData.lang = n; saveToCloud(); } else { localLang = n; localStorage.setItem('localLang', n); }
+        applySettingsToDOM(n, (auth.currentUser ? appData.theme : localTheme)); updateUI();
+    }
+    function toggleThemeGlobal() {
+        const c = (auth.currentUser) ? appData.theme : localTheme;
+        const n = c === 'light' ? 'dark' : 'light';
+        if(auth.currentUser) { appData.theme = n; saveToCloud(); } else { localTheme = n; localStorage.setItem('localTheme', n); }
+        applySettingsToDOM((auth.currentUser ? appData.lang : localLang), n);
+    }
+    function applySettingsToDOM(l, th) {
+        document.documentElement.setAttribute('data-theme', th);
+        const p = langPack[l];
+        document.getElementById('txt_welcome').innerText = p.welcome_user;
+        document.getElementById('langBtnLogin').innerText = l.toUpperCase();
+        document.getElementById('langBtnApp').innerText = l.toUpperCase();
+        document.getElementById('themeBtnLogin').innerText = th==='light'?'☀':'🌙';
+        document.getElementById('themeBtnApp').innerText = th==='light'?'☀':'🌙';
+        
+        // Text Updates
+        document.getElementById('txt_loginSub').innerText = p.loginSub;
+        document.getElementById('email').placeholder = p.emailPh; document.getElementById('password').placeholder = p.passPh;
+        document.getElementById('btn_welcome_login').innerText = p.welcome_login; document.getElementById('btn_welcome_reg').innerText = p.welcome_reg;
+        
+        document.getElementById('menu_home').innerText = p.menu_home; document.getElementById('menu_add').innerText = p.menu_add;
+        document.getElementById('menu_history').innerText = p.menu_history; document.getElementById('menu_profile').innerText = p.menu_profile;
+        document.getElementById('menu_logout').innerText = p.menu_logout;
+        
+        document.getElementById('txt_remind').innerText = p.remind; document.getElementById('txt_bodyStat').innerText = p.bodyStat;
+        document.getElementById('txt_cur').innerText = p.cur; document.getElementById('txt_tar').innerText = p.tar;
+        document.getElementById('txt_total').innerText = p.total; document.getElementById('txt_step').innerText = p.step; document.getElementById('txt_sport').innerText = p.sport;
+        document.getElementById('txt_todayWork').innerText = p.todayWork; document.getElementById('txt_stepCount').innerText = p.stepCount;
+        
+        document.getElementById('txt_addAct').innerText = p.addAct; document.getElementById('actName').placeholder = p.actNamePh; document.getElementById('actCal').placeholder = p.actCalPh;
+        document.getElementById('btn_addList').innerText = p.addListBtn; document.getElementById('txt_myList').innerText = p.myList;
+        
+        document.getElementById('txt_histTitle').innerText = p.histTitle; document.getElementById('th_date').innerText = p.th_date; document.getElementById('th_step').innerText = p.th_step; document.getElementById('th_cal').innerText = p.th_cal; document.getElementById('btn_clearHist').innerText = p.clearHist;
+        
+        document.getElementById('txt_settings').innerText = p.settings; document.getElementById('lbl_height').innerText = p.lbl_height; document.getElementById('lbl_weight').innerText = p.lbl_weight; document.getElementById('lbl_target').innerText = p.lbl_target; document.getElementById('lbl_freq').innerText = p.lbl_freq;
+        document.getElementById('btn_save').innerText = p.saveBtn; document.getElementById('txt_endDay').innerText = p.endDay; document.getElementById('btn_archive').innerText = p.archBtn;
+    }
 </script>
 </body>
 </html>
