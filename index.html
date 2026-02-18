@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>FitTakip Pro Final</title>
+    <title>FitTakip Cloud Pro</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
@@ -12,752 +12,353 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
     <style>
-        /* --- MODERN TEMA DEĞİŞKENLERİ --- */
+        /* TASARIM AYARLARI */
         :root {
-            --primary-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --accent: #FF6B6B;
-            --bg: #f0f2f5;
+            --primary: #6c5ce7;
+            --bg: #f5f6fa;
             --surface: #ffffff;
-            --text-main: #2d3436;
-            --text-sub: #636e72;
-            --border: #dfe6e9;
-            --shadow: 0 10px 20px rgba(0,0,0,0.05);
-            --radius: 20px;
-            --nav-height: 70px;
+            --text: #2d3436;
         }
 
-        [data-theme="dark"] {
-            --primary-grad: linear-gradient(135deg, #3a4b8a 0%, #462c63 100%);
-            --bg: #121212;
-            --surface: #1e1e1e;
-            --text-main: #f5f6fa;
-            --text-sub: #b2bec3;
-            --border: #2d3436;
-            --shadow: 0 10px 20px rgba(0,0,0,0.3);
-        }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 80px; }
+        * { box-sizing: border-box; }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--bg);
-            color: var(--text-main);
-            margin: 0; padding: 0;
-            padding-bottom: calc(var(--nav-height) + 20px);
-            transition: background 0.3s, color 0.3s;
-        }
-
-        /* --- BUTONLAR --- */
-        .btn-grad {
-            background-image: var(--primary-grad);
-            border: none; border-radius: 12px; color: white;
-            padding: 15px; width: 100%; font-size: 16px; font-weight: 600;
-            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
-            cursor: pointer; transition: transform 0.2s;
-        }
-        .btn-grad:active { transform: scale(0.98); }
-        
-        .btn-outline {
-            background: transparent; border: 2px solid #764ba2;
-            color: #764ba2; border-radius: 12px; padding: 14px; width: 100%;
-            font-weight: 600; cursor: pointer;
-        }
-        [data-theme="dark"] .btn-outline { border-color: #a29bfe; color: #a29bfe; }
-
-        .icon-btn {
-            background: var(--surface); border: none; width: 40px; height: 40px;
-            border-radius: 50%; box-shadow: var(--shadow); color: var(--text-main);
-            font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-        }
-
-        /* --- GİRİŞ SAYFASI --- */
-        #loginPage {
+        /* GİRİŞ EKRANI */
+        #loginScreen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 30px;
         }
-        .login-hero {
-            background: var(--surface); padding: 40px 30px; border-radius: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px;
-            text-align: center; position: relative; overflow: hidden;
+        .login-box {
+            background: var(--surface); padding: 30px; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center;
         }
-        .login-hero::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px;
-            background: var(--primary-grad);
+        input {
+            width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 10px;
+            border: 1px solid #ddd; font-family: inherit;
         }
-        .app-logo { font-size: 50px; margin-bottom: 10px; display: block; }
-        .login-hero h1 { margin: 10px 0; font-size: 28px; color: var(--text-main); }
-        .login-hero p { color: var(--text-sub); margin-bottom: 30px; font-size: 14px; }
+        .btn-main {
+            width: 100%; padding: 15px; background: var(--primary); color: white;
+            border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px;
+        }
+
+        /* ANA EKRAN */
+        #appScreen { display: none; padding: 20px; max-width: 600px; margin: 0 auto; }
         
-        .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group input {
-            width: 100%; padding: 15px; border-radius: 12px;
-            border: 1px solid var(--border); background: var(--bg);
-            color: var(--text-main); font-family: inherit; outline: none;
-            transition: 0.3s;
-        }
-        .input-group input:focus { border-color: #764ba2; box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1); }
-
-        /* --- ÜST HEADER --- */
-        header {
-            padding: 20px; display: flex; align-items: center; justify-content: space-between;
-            background: transparent; max-width: 600px; margin: 0 auto;
-        }
-        .header-title h2 { margin: 0; font-size: 24px; font-weight: 700; }
-        .header-title span { font-size: 12px; color: var(--text-sub); display: block; }
-
-        /* --- DURUM GÖSTERGESİ (KAYDEDİLİYOR) --- */
-        #status-indicator {
-            position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.8); color: white; padding: 5px 15px;
-            border-radius: 20px; font-size: 11px; z-index: 2000;
-            display: none; pointer-events: none;
-        }
-
-        /* --- ALT MENÜ --- */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height);
-            background: var(--surface);
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
-            display: flex; justify-content: space-around; align-items: center;
-            z-index: 500; border-top-left-radius: 25px; border-top-right-radius: 25px;
-        }
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: var(--text-sub); font-size: 10px; gap: 4px; text-decoration: none;
-            width: 25%; height: 100%; transition: 0.2s;
-        }
-        .nav-item i { font-size: 24px; font-style: normal; }
-        .nav-item.active { color: #764ba2; font-weight: 700; }
-        .nav-item.active i { transform: translateY(-3px); }
-        [data-theme="dark"] .nav-item.active { color: #a29bfe; }
-
-        /* --- SAYFALAR & KARTLAR --- */
-        .page { display: none; padding: 0 20px; max-width: 600px; margin: 0 auto; animation: fadeIn 0.3s ease; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
         .card {
-            background: var(--surface); border-radius: var(--radius);
-            padding: 25px; margin-bottom: 20px;
-            box-shadow: var(--shadow); border: 1px solid var(--border);
-            position: relative; overflow: hidden;
+            background: var(--surface); padding: 20px; border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px;
         }
-        .card h2 { margin-top: 0; font-size: 18px; display: flex; align-items: center; gap: 10px; }
-        
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; text-align: center; }
-        .stat-box strong { font-size: 22px; display: block; color: #764ba2; }
-        [data-theme="dark"] .stat-box strong { color: #a29bfe; }
-        .stat-box small { color: var(--text-sub); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
-
-        .progress-container { background: var(--bg); height: 12px; border-radius: 6px; overflow: hidden; margin-top: 15px; }
-        .progress-bar { height: 100%; background: var(--primary-grad); width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
-
-        .task-row {
-            display: flex; align-items: center; background: var(--bg);
-            padding: 15px; border-radius: 12px; margin-bottom: 10px;
-            transition: 0.2s;
-        }
-        .task-row:active { transform: scale(0.98); }
-        .checkbox {
-            width: 24px; height: 24px; border: 2px solid #764ba2; border-radius: 6px;
-            margin-right: 15px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-        }
-        .checked .checkbox { background: #764ba2; }
-        .checked .checkbox::after { content: '✔'; color: white; font-size: 14px; }
-        .checked span { text-decoration: line-through; opacity: 0.5; }
-
-        .error-msg {
-            color: #ff6b6b; background: rgba(255, 107, 107, 0.1);
-            padding: 10px; border-radius: 8px; font-size: 13px; margin-top: 10px;
-            display: none; text-align: left;
-        }
+        .stat-val { font-size: 24px; font-weight: bold; color: var(--primary); display: block; }
         
-        .setting-row { margin-bottom: 15px; }
-        .setting-row label { display: block; font-size: 13px; color: var(--text-sub); margin-bottom: 5px; }
-        .setting-row input, .setting-row select {
-            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
-            background: var(--bg); color: var(--text-main); font-family: 'Poppins';
+        /* SYNC DURUMU */
+        #syncStatus {
+            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+            background: #00b894; color: white; padding: 5px 15px; border-radius: 20px;
+            font-size: 12px; font-weight: bold; opacity: 0; transition: 0.3s; pointer-events: none;
         }
 
+        /* MENU */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
+            background: var(--surface); display: flex; justify-content: space-around; align-items: center;
+            border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+        }
+        .nav-btn { background: none; border: none; font-size: 24px; cursor: pointer; opacity: 0.5; }
+        .nav-btn.active { opacity: 1; color: var(--primary); }
+
+        .page { display: none; }
+        .page.active { display: block; }
+        
+        .task-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
+        .checked { text-decoration: line-through; color: #b2bec3; }
     </style>
 </head>
 <body>
 
-    <div id="status-indicator">Kaydediliyor... ☁️</div>
+    <div id="syncStatus">☁️ Buluta Kaydedildi</div>
 
-    <div id="loginPage">
-        <div style="position: absolute; top:20px; right:20px; display:flex; gap:10px;">
-            <button class="icon-btn" onclick="toggleLang()" id="langBtnLogin">TR</button>
-            <button class="icon-btn" onclick="toggleThemeGlobal()" id="themeBtnLogin">☀</button>
+    <div id="loginScreen">
+        <div class="login-box">
+            <h1>FitTakip Cloud</h1>
+            <p>Verilerin e-postana bağlanır.</p>
+            <input type="email" id="email" placeholder="E-posta">
+            <input type="password" id="pass" placeholder="Şifre">
+            <button class="btn-main" onclick="authAction('login')">Giriş Yap</button>
+            <button class="btn-main" style="background:#b2bec3; margin-top:10px;" onclick="authAction('register')">Kayıt Ol</button>
+            <p id="authError" style="color:red; font-size:12px; margin-top:10px;"></p>
         </div>
-
-        <div class="login-hero">
-            <span class="app-logo">🔥</span>
-            <h1>FitTakip Pro</h1>
-            <p id="txt_loginSub">Hedefine ulaş, sınırlarını zorla.</p>
-
-            <div id="auth-forms" style="display:none;">
-                <h3 id="form-title" style="text-align:left; margin-bottom:15px;">Giriş Yap</h3>
-                <div class="input-group"><input type="email" id="email" placeholder="E-posta"></div>
-                <div class="input-group"><input type="password" id="password" placeholder="Şifre"></div>
-                
-                <div id="loginError" class="error-msg"></div>
-
-                <button class="btn-grad" id="btn_action" onclick="performAuth()">Devam Et →</button>
-                <button onclick="goBack()" style="background:none; border:none; color:var(--text-sub); margin-top:15px; cursor:pointer;">İptal</button>
-            </div>
-
-            <div id="welcome-buttons">
-                <button class="btn-grad" onclick="showForm('login')" id="btn_welcome_login">Giriş Yap</button>
-                <div style="height:15px;"></div>
-                <button class="btn-outline" onclick="showForm('register')" id="btn_welcome_reg">Hesap Oluştur</button>
-            </div>
-        </div>
-        <p style="margin-top:20px; font-size:12px; color:var(--text-sub); opacity:0.5;">v12.0 Final Release</p>
     </div>
 
-    <div id="appPage">
-        
-        <header>
-            <div class="header-title">
-                <span id="txt_welcome">Hoş geldin,</span>
-                <h2 id="userEmailShort">Kullanıcı</h2>
-            </div>
-            <div style="display:flex; gap:10px;">
-                <button class="icon-btn" onclick="toggleLang()" id="langBtnApp">TR</button>
-                <button class="icon-btn" onclick="toggleThemeGlobal()" id="themeBtnApp">☀</button>
-            </div>
-        </header>
+    <div id="appScreen">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2 id="userTitle">Hoşgeldin</h2>
+            <button onclick="logout()" style="background:none; border:1px solid red; color:red; padding:5px 10px; border-radius:5px;">Çıkış</button>
+        </div>
 
-        <div id="dashboard" class="page active">
-            
-            <div id="weightReminder" class="card" style="background: linear-gradient(to right, #f6d365, #fda085); color:#fff; display:none; border:none;" onclick="switchPage('profile')">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <span style="font-size:24px;">⚖️</span>
-                    <div><strong style="display:block;">Hatırlatma</strong><span id="txt_remind" style="font-size:13px; opacity:0.9;">Tartılma zamanı geldi!</span></div>
-                </div>
-            </div>
-
+        <div id="page-home" class="page active">
             <div class="card">
-                <h2 id="txt_total">Günlük Özet 🔥</h2>
                 <div class="stat-grid">
-                    <div class="stat-box"><strong id="totalCal">0</strong><small>TOPLAM</small></div>
-                    <div class="stat-box"><strong id="stepCal">0</strong><small id="txt_step">ADIM</small></div>
-                    <div class="stat-box"><strong id="sportCal">0</strong><small id="txt_sport">SPOR</small></div>
+                    <div><span class="stat-val" id="dispTotal">0</span><small>TOPLAM</small></div>
+                    <div><span class="stat-val" id="dispStep">0</span><small>ADIM</small></div>
+                    <div><span class="stat-val" id="dispSport">0</span><small>SPOR</small></div>
                 </div>
             </div>
 
             <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h2 style="margin:0;" id="txt_bodyStat">Durum</h2>
-                    <span id="bmiLabel" style="font-size:12px; padding:4px 10px; background:#dfe6e9; border-radius:10px; color:#636e72;">--</span>
-                </div>
-                <div style="margin-top:15px; display:flex; justify-content:space-between; font-size:14px;">
-                    <span><span id="txt_cur">Kilo</span>: <b id="curW">--</b></span>
-                    <span><span id="txt_tar">Hedef</span>: <b id="tarW">--</b></span>
-                </div>
-                <div class="progress-container"><div id="wProg" class="progress-bar"></div></div>
+                <h3>👟 Bugün Kaç Adım?</h3>
+                <input type="number" id="inpStep" placeholder="0" oninput="handleStepChange(this.value)" style="font-size:20px; text-align:center;">
+                <small style="color:#636e72;">Yazdığın an buluta kaydedilir.</small>
             </div>
 
             <div class="card">
-                <h2 id="txt_todayWork">Görevler</h2>
+                <h3>🔥 Aktiviteler</h3>
                 <div id="taskList"></div>
-            </div>
-
-            <div class="card">
-                <h2 id="txt_stepCount">Hızlı Adım Girişi 👟</h2>
-                <div class="input-group">
-                    <input type="number" id="dailyStepsInput" placeholder="Adım sayısı..." oninput="handleStepInput(this.value)">
+                <div style="margin-top:10px; display:flex; gap:5px;">
+                    <input type="text" id="newActName" placeholder="Örn: Mekik" style="margin:0;">
+                    <input type="number" id="newActCal" placeholder="Kcal" style="width:80px; margin:0;">
+                    <button onclick="addActivity()" style="background:var(--primary); color:white; border:none; border-radius:10px; padding:0 15px;">+</button>
                 </div>
             </div>
         </div>
 
-        <div id="add-activity" class="page">
+        <div id="page-history" class="page">
             <div class="card">
-                <h2 id="txt_addAct">Yeni Aktivite ⚡</h2>
-                <div class="setting-row"><label>Aktivite Adı</label><input type="text" id="actName" placeholder="Örn: Koşu, Yüzme..."></div>
-                <div class="setting-row"><label>Kalori Değeri (kcal)</label><input type="number" id="actCal" placeholder="0"></div>
-                <div class="setting-row"><label>Video Linki (Opsiyonel)</label><input type="url" id="actLink" placeholder="YouTube..."></div>
-                <button class="btn-grad" onclick="addNewActivity()" id="btn_addList">Listeye Ekle</button>
-            </div>
-            <div class="card">
-                <h2 id="txt_myList">Kayıtlı Aktivitelerim</h2>
-                <div id="manageList"></div>
+                <h3>📜 Geçmiş Kayıtlar</h3>
+                <button onclick="endDay()" class="btn-main" style="background:#fdcb6e; color:#2d3436; margin-bottom:15px;">Günü Bitir & Arşivle</button>
+                <div id="historyList"></div>
             </div>
         </div>
 
-        <div id="history" class="page">
-            <div class="card">
-                <h2 id="txt_histTitle">Geçmiş Kayıtlar 📜</h2>
-                <table width="100%" id="historyTable" style="text-align:left; border-collapse:collapse; margin-top:10px;">
-                    <thead style="border-bottom:2px solid var(--border); color:var(--text-sub); font-size:12px;">
-                        <th style="padding:10px;" id="th_date">Tarih</th><th id="th_step">Adım</th><th id="th_cal">Kcal</th>
-                    </thead>
-                    <tbody style="font-size:14px;"></tbody>
-                </table>
-                <button onclick="clearHistory()" id="btn_clearHist" style="width:100%; margin-top:20px; background:#ff7675; color:white; border:none; padding:10px; border-radius:8px;">Temizle</button>
-            </div>
-        </div>
+    </div>
 
-        <div id="profile" class="page">
-            <div class="card">
-                <h2 id="txt_settings">Profil Ayarları ⚙️</h2>
-                <div class="setting-row"><label id="lbl_height">Boy (cm)</label><input type="number" id="uHeight" oninput="handleProfileInput()"></div>
-                <div class="setting-row"><label id="lbl_weight">Güncel Kilo (kg)</label><input type="number" id="uWeight" oninput="handleProfileInput(true)"></div>
-                <div class="setting-row"><label id="lbl_target">Hedef Kilo (kg)</label><input type="number" id="uTarget" oninput="handleProfileInput()"></div>
-                <div class="setting-row">
-                    <label id="lbl_freq">Tartılma Hatırlatıcısı</label>
-                    <select id="uFreq" onchange="handleProfileInput()">
-                        <option value="7">Haftada 1</option>
-                        <option value="30">Ayda 1</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="card" style="border:1px solid #ff7675;">
-                <h2 style="color:#ff7675;">Oturum</h2>
-                <button class="btn-outline" style="border-color:#ff7675; color:#ff7675;" onclick="endDay()" id="btn_archive">Günü Bitir</button>
-                <div style="height:10px;"></div>
-                <button class="btn-outline" style="border-color:#636e72; color:#636e72;" onclick="cikisYap()" id="menu_logout">Çıkış Yap</button>
-            </div>
-        </div>
-
-        <nav class="bottom-nav">
-            <a href="#" class="nav-item active" onclick="switchPage('dashboard', this)"><i>🏠</i> <span id="menu_home">Ana Sayfa</span></a>
-            <a href="#" class="nav-item" onclick="switchPage('add-activity', this)"><i>⚡</i> <span id="menu_add">Ekle</span></a>
-            <a href="#" class="nav-item" onclick="switchPage('history', this)"><i>📅</i> <span id="menu_history">Geçmiş</span></a>
-            <a href="#" class="nav-item" onclick="switchPage('profile', this)"><i>👤</i> <span id="menu_profile">Profil</span></a>
-        </nav>
+    <div class="bottom-nav" id="navBar" style="display:none;">
+        <button class="nav-btn active" onclick="switchPage('home')">🏠</button>
+        <button class="nav-btn" onclick="switchPage('history')">📅</button>
     </div>
 
 <script>
-    // --- FIREBASE BAŞLATMA ---
+    // --- 1. AYARLAR ---
     const firebaseConfig = {
       apiKey: "AIzaSyB656zs8jf-Pib4nDGjzm81EDYsK8WL-Xc",
       authDomain: "fittakipp.firebaseapp.com",
       projectId: "fittakipp",
       storageBucket: "fittakipp.firebasestorage.app",
       messagingSenderId: "526085600537",
-      appId: "1:526085600537:web:d56687929540fd932f4188",
-      measurementId: "G-81YYJKDC4R"
+      appId: "1:526085600537:web:d56687929540fd932f4188"
     };
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // --- VERİ MODELİ ---
-    const defaultData = {
-        activities: [], 
+    let currentUser = null;
+    let data = {
+        dailySteps: 0,
+        activities: [],
         history: [],
-        weight: 0, height: 0, targetWeight: 0, weightFreq: 7, lastWeightUpdate: null,
-        dailySteps: 0, // Bu değer veritabanında saklanır
-        lastDate: new Date().toLocaleDateString('tr-TR'), 
-        theme: 'light', lang: 'tr'
+        lastDate: new Date().toLocaleDateString('tr-TR')
     };
 
-    let appData = JSON.parse(JSON.stringify(defaultData));
-    let saveTimeout = null; // Debounce için zamanlayıcı
+    let saveTimer = null; // Yazarken sürekli kaydetmesin, bitince kaydetsin (Debounce)
 
-    // --- SAYFA YÜKLENİNCE ---
-    window.onload = function() {
-        const localLang = localStorage.getItem('localLang') || 'tr';
-        const localTheme = localStorage.getItem('localTheme') || 'light';
-        applySettingsToDOM(localLang, localTheme);
-    };
-
-    // --- AUTH YÖNETİMİ ---
+    // --- 2. GİRİŞ KONTROLÜ ---
     auth.onAuthStateChanged(user => {
         if (user) {
-            document.getElementById('loginPage').style.display = 'none';
-            document.getElementById('appPage').style.display = 'block';
-            document.getElementById('userEmailShort').innerText = user.email.split('@')[0];
-            loadFromCloud(user.uid);
+            currentUser = user;
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'block';
+            document.getElementById('navBar').style.display = 'flex';
+            document.getElementById('userTitle').innerText = user.email.split('@')[0];
+            loadData(); // Giriş yapınca veriyi çek
         } else {
-            document.getElementById('loginPage').style.display = 'flex';
-            document.getElementById('appPage').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('appScreen').style.display = 'none';
+            document.getElementById('navBar').style.display = 'none';
         }
     });
 
-    function showForm(mode) {
-        document.getElementById('welcome-buttons').style.display = 'none';
-        document.getElementById('auth-forms').style.display = 'block';
-        window.currentAuthMode = mode;
-        const p = langPack[appData.lang || localStorage.getItem('localLang') || 'tr'];
-        document.getElementById('form-title').innerText = (mode === 'login') ? p.welcome_login : p.welcome_reg;
-        document.getElementById('btn_action').innerText = (mode === 'login') ? p.loginBtn : p.regBtn;
-    }
-    
-    function goBack() {
-        document.getElementById('auth-forms').style.display = 'none';
-        document.getElementById('welcome-buttons').style.display = 'block';
-        document.getElementById('password').value = '';
-    }
-
-    function performAuth() {
+    function authAction(type) {
         const e = document.getElementById('email').value;
-        const p = document.getElementById('password').value;
-        if(window.currentAuthMode === 'login') {
-            auth.signInWithEmailAndPassword(e, p).catch(showError);
+        const p = document.getElementById('pass').value;
+        const err = document.getElementById('authError');
+        
+        if(type === 'login') {
+            auth.signInWithEmailAndPassword(e, p).catch(e => err.innerText = e.message);
         } else {
-            auth.createUserWithEmailAndPassword(e, p).then(cred => {
-                // Yeni kullanıcı için boş veri yaz
-                saveToCloudInternal(cred.user.uid, defaultData);
-            }).catch(showError);
+            auth.createUserWithEmailAndPassword(e, p).then(() => {
+                saveData(true); // Yeni kullanıcı için boş veri oluştur
+            }).catch(e => err.innerText = e.message);
         }
     }
 
-    function showError(err) {
-        const msg = err.message;
-        const errBox = document.getElementById('loginError'); errBox.style.display = 'block';
-        if (msg.includes('email-already-in-use')) errBox.innerHTML = "⚠️ E-posta zaten kullanımda.";
-        else if (msg.includes('wrong-password')) errBox.innerText = "⚠️ Hatalı şifre.";
-        else if (msg.includes('user-not-found')) errBox.innerText = "⚠️ Kullanıcı bulunamadı.";
-        else if (msg.includes('weak-password')) errBox.innerText = "⚠️ Şifre çok zayıf.";
-        else errBox.innerText = "Hata: " + msg;
-    }
+    function logout() { auth.signOut(); location.reload(); }
 
-    function cikisYap() { auth.signOut().then(() => location.reload()); }
-
-    // --- VERİTABANI İŞLEMLERİ (CRITICAL FIX) ---
-
-    // 1. VERİ OKUMA
-    function loadFromCloud(uid) {
-        db.collection('users').doc(uid).get().then(doc => {
+    // --- 3. VERİTABANI İŞLEMLERİ (EN ÖNEMLİ KISIM) ---
+    
+    // VERİ ÇEKME
+    function loadData() {
+        if(!currentUser) return;
+        
+        // Veritabanından kullanıcının verisini al
+        db.collection('users').doc(currentUser.uid).get().then(doc => {
             if (doc.exists) {
-                const data = doc.data();
-                // Eksik alanları varsayılanlarla tamamla
-                appData = { ...defaultData, ...data };
+                // Veri varsa değişkene ata
+                const cloudData = doc.data();
+                data = { ...data, ...cloudData }; // Eksikleri tamamla
                 
-                // Temel ayarları uygula
-                applySettingsToDOM(appData.lang, appData.theme);
-                
-                // Kritik: Inputları doldur
-                fillInputsFromData();
-                
-                // Hesaplamaları yap
-                calculateStats();
-                
-                // Gün kontrolü
-                checkNewDay();
+                // Günü kontrol et
+                const today = new Date().toLocaleDateString('tr-TR');
+                if (data.lastDate !== today) {
+                    alert("Yeni gün başladı! Sayaçlar sıfırlanıyor...");
+                    archiveOldDay(); // Eski günü kaydet
+                }
+
+                updateUI(); // Ekranı güncelle
             } else {
-                appData = JSON.parse(JSON.stringify(defaultData));
-                saveToCloud(); // İlk kez oluştur
-                fillInputsFromData();
+                saveData(true); // Veri yoksa oluştur
             }
         });
     }
 
-    // 2. INPUTLARI DOLDURMA (Veriden Ekrana)
-    function fillInputsFromData() {
-        document.getElementById('dailyStepsInput').value = appData.dailySteps || ""; // 0 yerine boş gösterilebilir veya 0
-        document.getElementById('uHeight').value = appData.height || "";
-        document.getElementById('uWeight').value = appData.weight || "";
-        document.getElementById('uTarget').value = appData.targetWeight || "";
-        document.getElementById('uFreq').value = appData.weightFreq || 7;
-        
-        renderTasks();
-        renderManage();
-        renderHistory();
-    }
+    // VERİ KAYDETME
+    function saveData(force = false) {
+        if(!currentUser) return;
 
-    // 3. AKILLI KAYIT (DEBOUNCE)
-    // Her tuşa basıldığında kaydetmek yerine, yazma bitince kaydeder.
-    function triggerSave() {
-        const indicator = document.getElementById('status-indicator');
-        
-        // Önceki bekleyen kaydı iptal et
-        if (saveTimeout) clearTimeout(saveTimeout);
-        
-        // Yeni bir kayıt emri ver (1 saniye bekle)
-        saveTimeout = setTimeout(() => {
-            indicator.style.display = 'block'; // Göster
-            saveToCloud().then(() => {
-                setTimeout(() => { indicator.style.display = 'none'; }, 1000); // 1 sn sonra gizle
+        // Ekrana "Kaydediliyor" yaz
+        const status = document.getElementById('syncStatus');
+        status.style.opacity = '1';
+        status.innerText = "☁️ Kaydediliyor...";
+        status.style.background = "#fdcb6e"; // Sarı
+
+        // Veritabanına GÖNDER
+        db.collection('users').doc(currentUser.uid).set(data)
+            .then(() => {
+                // Başarılı olunca
+                setTimeout(() => {
+                    status.innerText = "✅ Buluta Kaydedildi";
+                    status.style.background = "#00b894"; // Yeşil
+                    setTimeout(() => status.style.opacity = '0', 2000);
+                }, 500);
+            })
+            .catch((error) => {
+                status.innerText = "❌ Hata!";
+                status.style.background = "#ff7675";
+                console.error("Kayıt hatası: ", error);
             });
-        }, 1000); // 1000ms bekleme süresi
     }
 
-    function saveToCloud() {
-        const user = auth.currentUser;
-        if(!user) return Promise.resolve();
-        return saveToCloudInternal(user.uid, appData);
-    }
-
-    function saveToCloudInternal(uid, data) {
-        return db.collection('users').doc(uid).set(data).catch(e => console.error(e));
-    }
-
-    // --- EVENT HANDLERS (INPUT YÖNETİMİ) ---
+    // --- 4. HESAPLAMALAR VE ARAYÜZ ---
     
     // Adım sayısı değişince
-    function handleStepInput(val) {
-        appData.dailySteps = parseInt(val) || 0;
-        calculateStats(); // Ekrandaki hesapları güncelle (Anlık)
-        triggerSave();    // Veritabanına kaydı sıraya al
-    }
-
-    // Profil verileri değişince
-    function handleProfileInput(isWeight = false) {
-        appData.height = parseFloat(document.getElementById('uHeight').value) || 0;
-        appData.weight = parseFloat(document.getElementById('uWeight').value) || 0;
-        appData.targetWeight = parseFloat(document.getElementById('uTarget').value) || 0;
-        appData.weightFreq = parseInt(document.getElementById('uFreq').value) || 7;
+    function handleStepChange(val) {
+        data.dailySteps = parseInt(val) || 0;
+        calculate();
         
-        if(isWeight) {
-            appData.lastWeightUpdate = new Date().toISOString().split('T')[0];
-        }
-
-        calculateStats();
-        triggerSave();
+        // Yazarken bekle, yazma bitince kaydet (1 saniye bekleme)
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+            saveData();
+        }, 1000);
     }
 
-    // --- HESAPLAMA MOTORU ---
-    function calculateStats() {
-        const steps = appData.dailySteps || 0;
-        const sCal = Math.round(steps * 0.04);
+    function calculate() {
+        const stepCal = Math.round(data.dailySteps * 0.04);
+        let sportCal = 0;
+        data.activities.forEach(a => { if(a.done) sportCal += a.cal; });
+
+        document.getElementById('dispStep').innerText = stepCal;
+        document.getElementById('dispSport').innerText = sportCal;
+        document.getElementById('dispTotal').innerText = stepCal + sportCal;
+    }
+
+    function updateUI() {
+        // Inputları doldur
+        document.getElementById('inpStep').value = data.dailySteps === 0 ? '' : data.dailySteps;
         
-        let spCal = 0; 
-        if(appData.activities) {
-            appData.activities.forEach(a => { if(a.completed) spCal += a.cal; });
-        }
+        // Listeyi doldur
+        const list = document.getElementById('taskList');
+        list.innerHTML = '';
+        data.activities.forEach((act, index) => {
+            list.innerHTML += `
+            <div class="task-item" onclick="toggleTask(${index})">
+                <span class="${act.done ? 'checked' : ''}">${act.name} (${act.cal} kcal)</span>
+                <span>${act.done ? '✅' : '⬜'}</span>
+                <span onclick="delTask(${index}, event)" style="color:red; margin-left:10px;">🗑️</span>
+            </div>`;
+        });
 
-        document.getElementById('totalCal').innerText = sCal + spCal;
-        document.getElementById('stepCal').innerText = sCal;
-        document.getElementById('sportCal').innerText = spCal;
+        // Geçmişi doldur
+        const hist = document.getElementById('historyList');
+        hist.innerHTML = '';
+        data.history.forEach(h => {
+            hist.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee;">
+                <b>${h.date}</b>: ${h.total} kcal (${h.steps} adım)
+            </div>`;
+        });
 
-        // BMI ve Bar Hesaplama
-        const bmiLbl = document.getElementById('bmiLabel');
-        const p = langPack[appData.lang || 'tr'];
-        
-        if(appData.height > 0 && appData.weight > 0) {
-            const h = appData.height/100;
-            const bmi = (appData.weight / (h*h)).toFixed(1);
-            bmiLbl.innerText = "BMI: " + bmi;
-            
-            if(bmi<18.5) { bmiLbl.style.background="#74b9ff"; bmiLbl.style.color="#fff"; }
-            else if(bmi<25) { bmiLbl.style.background="#00b894"; bmiLbl.style.color="#fff"; }
-            else if(bmi<30) { bmiLbl.style.background="#fdcb6e"; bmiLbl.style.color="#fff"; }
-            else { bmiLbl.style.background="#ff7675"; bmiLbl.style.color="#fff"; }
-        } else {
-            bmiLbl.innerText = "--";
-            bmiLbl.style.background="#dfe6e9"; bmiLbl.style.color="#636e72";
-        }
+        calculate();
+    }
 
-        document.getElementById('curW').innerText = appData.weight || "--";
-        document.getElementById('tarW').innerText = appData.targetWeight || "--";
-
-        if(appData.targetWeight > 0 && appData.weight > 0) {
-             let progress = 0;
-             // Kilo verme hedefi varsayımı
-             if(appData.weight > appData.targetWeight) {
-                 // Basit bir görselleştirme (Tam algoritma karmaşık olabilir)
-                 progress = 50; 
-             } else {
-                 progress = 100;
-             }
-             // Daha düzgün bir bar için sabit width verelim şimdilik
-             document.getElementById('wProg').style.width = "100%";
+    // --- 5. AKTİVİTE YÖNETİMİ ---
+    function addActivity() {
+        const name = document.getElementById('newActName').value;
+        const cal = parseInt(document.getElementById('newActCal').value);
+        if(name && cal) {
+            data.activities.push({ name: name, cal: cal, done: false });
+            document.getElementById('newActName').value = '';
+            document.getElementById('newActCal').value = '';
+            updateUI();
+            saveData(); // Anında kaydet
         }
     }
 
-    // --- AKTİVİTE & LİSTE ---
-    function addNewActivity() {
-        const n = document.getElementById('actName').value;
-        const c = parseInt(document.getElementById('actCal').value);
-        const l = document.getElementById('actLink').value;
-        if(n && c) {
-            if(!appData.activities) appData.activities = [];
-            appData.activities.push({id:Date.now(), name:n, cal:c, link:l, completed:false});
-            document.getElementById('actName').value=''; 
-            document.getElementById('actCal').value='';
-            document.getElementById('actLink').value='';
-            
-            renderTasks();
-            renderManage();
-            calculateStats();
-            triggerSave(); // Kaydet
-            alert(langPack[appData.lang].alert_added);
-        }
+    function toggleTask(index) {
+        data.activities[index].done = !data.activities[index].done;
+        updateUI();
+        saveData();
     }
 
-    function toggleTask(id) {
-        const t = appData.activities.find(a=>a.id===id);
-        if(t) { 
-            t.completed = !t.completed; 
-            calculateStats(); 
-            triggerSave(); 
-            renderTasks(); // Checkbox görselini güncelle
-        }
+    function delTask(index, e) {
+        e.stopPropagation(); // Tıklamayı engelle
+        data.activities.splice(index, 1);
+        updateUI();
+        saveData();
     }
 
-    function deleteTask(id) {
-        if(confirm("Silmek istediğine emin misin?")) {
-            appData.activities = appData.activities.filter(a=>a.id!==id);
-            renderTasks();
-            renderManage();
-            calculateStats();
-            triggerSave();
-        }
+    // --- 6. GÜN BİTİRME ---
+    function endDay() {
+        if(!confirm("Günü bitirip arşive atmak istiyor musun?")) return;
+        archiveOldDay();
     }
 
-    function renderTasks() {
-        const c = document.getElementById('taskList'); c.innerHTML = '';
-        if(appData.activities) {
-            appData.activities.forEach(a => {
-                c.innerHTML += `<div class="task-row ${a.completed?'checked':''}" onclick="toggleTask(${a.id})">
-                <div class="checkbox"></div>
-                <div style="flex:1;"><span>${a.name}</span> <small style="color:var(--text-sub);">(${a.cal} kcal)</small></div>
-                ${a.link ? `<a href="${a.link}" target="_blank" onclick="event.stopPropagation()">🎬</a>`:''}
-                </div>`;
+    function archiveOldDay() {
+        const sCal = Math.round(data.dailySteps * 0.04);
+        let spCal = 0;
+        data.activities.forEach(a => { if(a.done) spCal += a.cal; });
+
+        if(sCal + spCal > 0) {
+            data.history.unshift({
+                date: data.lastDate,
+                total: sCal + spCal,
+                steps: data.dailySteps
             });
         }
-    }
-
-    function renderManage() {
-        const c = document.getElementById('manageList'); c.innerHTML='';
-        if(appData.activities) appData.activities.forEach(a => c.innerHTML += `<div class="task-row" style="padding:10px;"><span>${a.name}</span> <button onclick="deleteTask(${a.id})" style="margin-left:auto;color:#ff7675;background:none;border:none;">Sil</button></div>`);
-    }
-
-    // --- GÜN SONU & GEÇMİŞ ---
-    function checkNewDay() {
-        const t = new Date().toLocaleDateString('tr-TR');
-        if(appData.lastDate !== t) {
-            endDay(true); // Otomatik bitir
-            appData.lastDate = t;
-            saveToCloud();
-            alert(langPack[appData.lang].alert_newDay);
-        }
-    }
-
-    function endDay(auto=false) {
-        if(!auto && !confirm(langPack[appData.lang].endDay + "?")) return;
         
-        const s = Math.round((appData.dailySteps || 0) * 0.04);
-        let sp = 0; if(appData.activities) appData.activities.forEach(a => { if(a.completed) sp += a.cal; });
+        // Sıfırla
+        data.dailySteps = 0;
+        data.activities.forEach(a => a.done = false);
+        data.lastDate = new Date().toLocaleDateString('tr-TR');
         
-        if(s+sp > 0) {
-            if(!appData.history) appData.history = [];
-            appData.history.unshift({date: appData.lastDate, total: s+sp, steps: appData.dailySteps});
-            
-            // Sıfırlama işlemi
-            appData.dailySteps = 0;
-            if(appData.activities) appData.activities.forEach(a=>a.completed=false);
-            
-            fillInputsFromData(); // Inputları da sıfırla!
-            calculateStats();
-            saveToCloud();
-            
-            if(!auto) alert("Gün arşivlendi!");
-        }
+        updateUI();
+        saveData();
     }
 
-    function renderHistory() {
-        const tb = document.querySelector('#historyTable tbody'); tb.innerHTML='';
-        if(appData.history) appData.history.forEach(h => tb.innerHTML += `<tr style="border-bottom:1px solid var(--border);"><td style="padding:10px;">${h.date}</td><td>${h.steps}</td><td>${h.total}</td></tr>`);
-    }
-
-    function clearHistory() { 
-        if(confirm("Tüm geçmişi sil?")) { 
-            appData.history=[]; 
-            renderHistory(); 
-            triggerSave(); 
-        } 
-    }
-
-    // --- NAVİGASYON ---
-    function switchPage(id, el) {
-        document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        if(el) {
-            document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-            el.classList.add('active');
-        }
-    }
-
-    // --- AYARLAR & DİL ---
-    const langPack = {
-        tr: {
-            loginSub: "Hedefine ulaş, sınırlarını zorla.",
-            emailPh: "E-posta Adresi", passPh: "Şifre",
-            loginBtn: "Devam Et →", regBtn: "Hesap Oluştur",
-            welcome_login: "Giriş Yap", welcome_reg: "Kayıt Ol",
-            menu_home: "Ana Sayfa", menu_add: "Ekle", menu_history: "Geçmiş", menu_profile: "Profil", menu_logout: "Çıkış Yap",
-            remind: "Tartılma zamanı geldi!",
-            bodyStat: "Vücut Durumu", cur: "Kilo", tar: "Hedef",
-            total: "Günlük Özet", step: "ADIM", sport: "SPOR",
-            todayWork: "Görevler", stepCount: "Hızlı Adım Girişi",
-            addAct: "Yeni Aktivite", actNamePh: "Ad (Örn: Yürüyüş)", actCalPh: "Kalori", addListBtn: "Listeye Ekle", myList: "Kayıtlı Aktivitelerim",
-            histTitle: "Geçmiş Kayıtlar", th_date: "Tarih", th_step: "Adım", th_cal: "Kcal", clearHist: "Temizle",
-            settings: "Profil Ayarları", lbl_height: "Boy (cm)", lbl_weight: "Güncel Kilo (kg)", lbl_target: "Hedef Kilo", lbl_freq: "Hatırlatma", saveBtn: "Ayarları Kaydet",
-            endDay: "Günü bitirip arşive kaldırır.", archBtn: "Günü Bitir",
-            alert_newDay: "☀️ Yeni bir gün başladı! İstatistikler sıfırlandı.", alert_saved: "✅ Kaydedildi!", alert_added: "✅ Eklendi!",
-            welcome_user: "Hoş geldin,"
-        },
-        en: {
-            loginSub: "Reach your goals, push your limits.",
-            emailPh: "Email Address", passPh: "Password",
-            loginBtn: "Continue →", regBtn: "Create Account",
-            welcome_login: "Login", welcome_reg: "Register",
-            menu_home: "Home", menu_add: "Add", menu_history: "History", menu_profile: "Profile", menu_logout: "Logout",
-            remind: "Time to weigh in!",
-            bodyStat: "Body Status", cur: "Weight", tar: "Target",
-            total: "Daily Summary", step: "STEPS", sport: "SPORT",
-            todayWork: "Today's Tasks", stepCount: "Step Entry",
-            addAct: "New Activity", actNamePh: "Name (e.g. Run)", actCalPh: "Calories", addListBtn: "Add to List", myList: "My Activities",
-            histTitle: "History Logs", th_date: "Date", th_step: "Steps", th_cal: "Kcal", clearHist: "Clear",
-            settings: "Profile Settings", lbl_height: "Height (cm)", lbl_weight: "Current Weight (kg)", lbl_target: "Target Weight", lbl_freq: "Reminder Freq", saveBtn: "Save Settings",
-            endDay: "Archive stats and end day.", archBtn: "End Day",
-            alert_newDay: "☀️ A new day has started! Stats reset.", alert_saved: "✅ Saved!", alert_added: "✅ Added!",
-            welcome_user: "Welcome,"
-        }
-    };
-
-    function toggleLang() {
-        const c = appData.lang || 'tr';
-        const n = c === 'tr' ? 'en' : 'tr';
-        appData.lang = n;
-        localStorage.setItem('localLang', n);
-        applySettingsToDOM(n, appData.theme);
-        triggerSave();
-    }
-
-    function toggleThemeGlobal() {
-        const c = appData.theme || 'light';
-        const n = c === 'light' ? 'dark' : 'light';
-        appData.theme = n;
-        localStorage.setItem('localTheme', n);
-        applySettingsToDOM(appData.lang, n);
-        triggerSave();
-    }
-
-    function applySettingsToDOM(l, th) {
-        document.documentElement.setAttribute('data-theme', th);
-        const p = langPack[l];
-        // Basit text güncellemeleri
-        document.getElementById('txt_welcome').innerText = p.welcome_user;
-        document.getElementById('langBtnLogin').innerText = l.toUpperCase();
-        document.getElementById('langBtnApp').innerText = l.toUpperCase();
-        document.getElementById('themeBtnLogin').innerText = th==='light'?'☀':'🌙';
-        document.getElementById('themeBtnApp').innerText = th==='light'?'☀':'🌙';
-        document.getElementById('txt_loginSub').innerText = p.loginSub;
-        document.getElementById('email').placeholder = p.emailPh; document.getElementById('password').placeholder = p.passPh;
-        document.getElementById('btn_welcome_login').innerText = p.welcome_login; document.getElementById('btn_welcome_reg').innerText = p.welcome_reg;
-        document.getElementById('menu_home').innerText = p.menu_home; document.getElementById('menu_add').innerText = p.menu_add;
-        document.getElementById('menu_history').innerText = p.menu_history; document.getElementById('menu_profile').innerText = p.menu_profile;
-        document.getElementById('menu_logout').innerText = p.menu_logout;
-        document.getElementById('txt_remind').innerText = p.remind; document.getElementById('txt_bodyStat').innerText = p.bodyStat;
-        document.getElementById('txt_cur').innerText = p.cur; document.getElementById('txt_tar').innerText = p.tar;
-        document.getElementById('txt_total').innerText = p.total; document.getElementById('txt_step').innerText = p.step; document.getElementById('txt_sport').innerText = p.sport;
-        document.getElementById('txt_todayWork').innerText = p.todayWork; document.getElementById('txt_stepCount').innerText = p.stepCount;
-        document.getElementById('txt_addAct').innerText = p.addAct; document.getElementById('actName').placeholder = p.actNamePh; document.getElementById('actCal').placeholder = p.actCalPh;
-        document.getElementById('btn_addList').innerText = p.addListBtn; document.getElementById('txt_myList').innerText = p.myList;
-        document.getElementById('txt_histTitle').innerText = p.histTitle; document.getElementById('th_date').innerText = p.th_date; document.getElementById('th_step').innerText = p.th_step; document.getElementById('th_cal').innerText = p.th_cal; document.getElementById('btn_clearHist').innerText = p.clearHist;
-        document.getElementById('txt_settings').innerText = p.settings; document.getElementById('lbl_height').innerText = p.lbl_height; document.getElementById('lbl_weight').innerText = p.lbl_weight; document.getElementById('lbl_target').innerText = p.lbl_target; document.getElementById('lbl_freq').innerText = p.lbl_freq;
-        document.getElementById('txt_endDay').innerText = p.endDay; document.getElementById('btn_archive').innerText = p.archBtn;
+    function switchPage(p) {
+        document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
+        document.getElementById('page-'+p).classList.add('active');
+        document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
+        event.currentTarget.classList.add('active');
     }
 </script>
 </body>
