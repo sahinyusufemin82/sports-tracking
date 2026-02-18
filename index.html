@@ -53,6 +53,7 @@
         button.primary-btn { width: 100%; background-color: var(--primary); color: white; padding: 14px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         button.secondary-btn { width: 100%; background-color: transparent; border: 1px solid var(--border); color: var(--text); padding: 14px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
         button.text-btn { background: none; border: none; color: var(--text); opacity: 0.7; cursor: pointer; margin-top: 10px; text-decoration: underline; font-size: 14px; }
+        button.danger-btn { background-color: #dc3545; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; margin-top: 5px; font-size: 13px; width: 100%; }
 
         /* UYGULAMA İÇİ */
         #appPage { display: none; }
@@ -81,7 +82,7 @@
         .task-item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid var(--border); }
         .progress-bar { height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; margin-top: 5px; }
         .progress-fill { height: 100%; background: #28a745; width: 0%; transition: width 0.5s; }
-        .error-msg { color: #dc3545; font-size: 14px; margin-top: 5px; display: none; }
+        .error-msg { color: #dc3545; font-size: 14px; margin-top: 10px; display: none; border: 1px solid #dc3545; padding: 10px; border-radius: 5px; background: rgba(220, 53, 69, 0.1); }
     </style>
 </head>
 <body>
@@ -105,14 +106,15 @@
                 <h2 id="form-title">Giriş</h2>
                 <input type="email" id="email" placeholder="E-posta Adresi">
                 <input type="password" id="password" placeholder="Şifre">
-                <p id="loginError" class="error-msg"></p>
+                
+                <div id="loginError" class="error-msg"></div>
+                <button id="resendBtn" class="danger-btn" style="display:none;" onclick="resendVerification()">📩 Doğrulama Mailini Tekrar Gönder</button>
 
                 <button class="primary-btn" id="btn_action" onclick="performAuth()">Giriş Yap</button>
-                
                 <button class="text-btn" onclick="goBack()" id="btn_back">← Geri Dön</button>
             </div>
 
-            <div style="margin-top:20px; font-size:12px; opacity:0.6;">FitTakip Global v8.0</div>
+            <div style="margin-top:20px; font-size:12px; opacity:0.6;">FitTakip Global v9.0</div>
         </div>
     </div>
 
@@ -134,7 +136,6 @@
         <header>
             <button class="menu-btn" onclick="openNav()">&#9776;</button>
             <p class="app-title">FitTakip</p>
-            
             <div class="header-controls">
                 <button class="icon-btn" onclick="toggleLang()" id="langBtnApp">TR</button>
                 <button class="icon-btn" onclick="toggleThemeGlobal()" id="themeBtnApp">☀</button>
@@ -260,7 +261,7 @@
             
             alert_newDay: "Yeni bir gün başladı!", alert_saved: "Kaydedildi!", alert_added: "Eklendi!",
             alert_mail_sent: "✅ Doğrulama maili gönderildi!\n\n⚠️ Lütfen SPAM (Gereksiz) klasörünü mutlaka kontrol et.",
-            alert_verify_first: "Lütfen önce e-posta adresine gelen linke tıkla!",
+            alert_verify_first: "E-posta adresin henüz doğrulanmamış. Lütfen mailindeki linke tıkla.",
             spam_check: "Spam kutusunu kontrol etmeyi unutma!",
             lbl_normal: "Normal", lbl_over: "Fazla", lbl_obese: "Obez", lbl_weak: "Zayıf"
         },
@@ -286,7 +287,7 @@
             
             alert_newDay: "A new day has started!", alert_saved: "Saved!", alert_added: "Added!",
             alert_mail_sent: "✅ Verification email sent!\n\n⚠️ Please check your SPAM/Junk folder.",
-            alert_verify_first: "Please verify your email address first!",
+            alert_verify_first: "Your email is not verified yet. Please click the link in your email.",
             spam_check: "Don't forget to check your spam folder!",
             lbl_normal: "Normal", lbl_over: "Overweight", lbl_obese: "Obese", lbl_weak: "Underweight"
         }
@@ -301,34 +302,34 @@
     };
 
     let appData = JSON.parse(JSON.stringify(defaultData));
-    
-    // Tarayıcı hafızasındaki tercihler
     let localLang = localStorage.getItem('localLang') || 'tr';
     let localTheme = localStorage.getItem('localTheme') || 'light';
-    let authMode = 'login'; // 'login' veya 'register'
+    let authMode = 'login'; 
 
     window.onload = function() {
         applySettingsToDOM(localLang, localTheme);
     };
 
-    // --- ARAYÜZ YÖNETİMİ (GİRİŞ EKRANI) ---
+    // --- ARAYÜZ YÖNETİMİ ---
     function showForm(mode) {
         authMode = mode;
         const p = langPack[localLang];
-        
-        // Başlığı ve Butonu Ayarla
         document.getElementById('form-title').innerText = (mode === 'login') ? p.welcome_login : p.welcome_reg;
         document.getElementById('btn_action').innerText = (mode === 'login') ? p.loginBtn : p.regBtn;
         
-        // Görünümü Değiştir
         document.getElementById('welcome-buttons').style.display = 'none';
         document.getElementById('auth-forms').style.display = 'block';
+        
+        // Hata mesajlarını temizle
+        document.getElementById('loginError').style.display = 'none';
+        document.getElementById('resendBtn').style.display = 'none';
     }
 
     function goBack() {
         document.getElementById('auth-forms').style.display = 'none';
         document.getElementById('welcome-buttons').style.display = 'flex';
         document.getElementById('loginError').style.display = 'none';
+        document.getElementById('resendBtn').style.display = 'none';
         document.getElementById('password').value = '';
     }
 
@@ -337,45 +338,63 @@
         else kayitOl();
     }
 
-    // --- OTURUM YÖNETİMİ ---
+    // --- OTURUM YÖNETİMİ (KİLİT NOKTA) ---
+    // Bu kod otomatik giriş içindir. Kullanıcı mailden dönerse çalışır.
     auth.onAuthStateChanged(user => {
-        if (user) {
-            if (!user.emailVerified) {
-                // Mail Onaylı Değilse Sor
-                const yeniMailIste = confirm(langPack[localLang].alert_verify_first + "\n\n" + (localLang==='tr'?"Yeni link gönderilsin mi?":"Resend link?"));
-                
-                if (yeniMailIste) {
-                    user.sendEmailVerification().then(() => {
-                        alert(langPack[localLang].alert_mail_sent);
-                        auth.signOut();
-                    }).catch(err => {
-                        alert("Error: " + err.message);
-                        auth.signOut();
-                    });
-                } else {
-                    auth.signOut();
-                }
-                return;
-            }
-
-            // Giriş Başarılı
-            document.getElementById('loginPage').style.display = 'none';
-            document.getElementById('appPage').style.display = 'block';
-            document.getElementById('userEmailDisplay').innerText = user.email;
-            loadFromCloud(user.uid); 
+        if (user && user.emailVerified) {
+            // Mail Onaylı -> İçeri Al
+            enterApp(user);
+        } else if (user && !user.emailVerified) {
+            // Giriş yapmış ama onaylamamış -> Dışarı atma, sadece formda hata göster
+            // (Manuel girisYap fonksiyonu bunu yönetecek, burası sessiz kalabilir)
         } else {
-            // Çıkış
+            // Çıkış yapmış
             document.getElementById('loginPage').style.display = 'flex';
             document.getElementById('appPage').style.display = 'none';
-            goBack(); // Ana ekrana dön
-            applySettingsToDOM(localLang, localTheme);
         }
     });
 
-    function girisYap() {
+    async function girisYap() {
         const e = document.getElementById('email').value;
         const p = document.getElementById('password').value;
-        auth.signInWithEmailAndPassword(e, p).catch(err => showError(err.message));
+        const errBox = document.getElementById('loginError');
+        const resendBtn = document.getElementById('resendBtn');
+
+        try {
+            const userCredential = await auth.signInWithEmailAndPassword(e, p);
+            const user = userCredential.user;
+
+            // ÖNEMLİ: Kullanıcı linke tıkladı mı diye Firebase'i zorla güncelle
+            await user.reload();
+
+            if (user.emailVerified) {
+                // Başarılı
+                enterApp(user);
+            } else {
+                // Hata Göster
+                errBox.style.display = 'block';
+                errBox.innerHTML = langPack[localLang].alert_verify_first;
+                resendBtn.style.display = 'block'; // Tekrar gönder butonu aç
+            }
+        } catch (err) {
+            showError(err.message);
+        }
+    }
+
+    function resendVerification() {
+        const user = auth.currentUser;
+        if(user) {
+            user.sendEmailVerification().then(() => {
+                alert(langPack[localLang].alert_mail_sent);
+            }).catch(err => alert("Hata: " + err.message));
+        }
+    }
+
+    function enterApp(user) {
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('appPage').style.display = 'block';
+        document.getElementById('userEmailDisplay').innerText = user.email;
+        loadFromCloud(user.uid);
     }
 
     function kayitOl() {
@@ -386,21 +405,41 @@
         appData.theme = localTheme;
 
         auth.createUserWithEmailAndPassword(e, p).then((cred) => {
-            saveToCloud();
-            // Mail Gönder
+            saveToCloud(cred.user.uid); // ID ile kaydet
             cred.user.sendEmailVerification().then(() => {
-                auth.signOut();
                 alert(langPack[localLang].alert_mail_sent);
-                location.reload();
+                // Kayıttan sonra giriş ekranına at, otomatik giriş yapma
+                auth.signOut();
+                goBack(); 
             });
         }).catch(err => showError(err.message));
     }
 
     function cikisYap() { 
         auth.signOut().then(() => {
-            appData = JSON.parse(JSON.stringify(defaultData)); 
             location.reload(); 
         });
+    }
+
+    function showError(msg) { 
+        const errBox = document.getElementById('loginError');
+        errBox.style.display = 'block';
+        
+        if (msg.includes('email-already-in-use')) {
+            errBox.innerHTML = "⚠️ <b>Bu e-posta zaten kayıtlı!</b><br>Lütfen 'Kayıt Ol' yerine 'Giriş Yap'ı kullan.";
+        } else if (msg.includes('wrong-password')) {
+            errBox.innerText = "Hatalı şifre.";
+        } else if (msg.includes('user-not-found')) {
+            errBox.innerText = "Böyle bir kullanıcı yok.";
+        } else if (msg.includes('invalid-email')) {
+            errBox.innerText = "Geçersiz e-posta formatı.";
+        } else if (msg.includes('weak-password')) {
+            errBox.innerText = "Şifre çok zayıf (En az 6 karakter).";
+        } else if (msg.includes('too-many-requests')) {
+            errBox.innerText = "Çok fazla deneme yaptınız. Biraz bekleyin.";
+        } else {
+            errBox.innerText = "Hata: " + msg;
+        }
     }
 
     // --- DİL VE TEMA MOTORU ---
@@ -415,7 +454,6 @@
         
         applySettingsToDOM(newLang, (auth.currentUser ? appData.theme : localTheme));
         updateUI(); 
-        // Eğer giriş ekranındaysa başlıkları güncelle
         if(document.getElementById('loginPage').style.display !== 'none') {
              if(authMode) showForm(authMode);
         }
@@ -443,7 +481,6 @@
         document.getElementById('themeBtnApp').innerText = themeIcon;
 
         const p = langPack[l];
-        // Login Page UI
         document.getElementById('txt_loginSub').innerText = p.loginSub;
         document.getElementById('email').placeholder = p.emailPh;
         document.getElementById('password').placeholder = p.passPh;
@@ -451,7 +488,6 @@
         document.getElementById('btn_welcome_login').innerText = p.welcome_login;
         document.getElementById('btn_welcome_reg').innerText = p.welcome_reg;
         
-        // App Page UI
         document.getElementById('txt_userTitle').innerText = (l==='tr'?'KULLANICI':'USER');
         document.getElementById('menu_home').innerText = p.menu_home;
         document.getElementById('menu_add').innerText = p.menu_add;
@@ -492,10 +528,11 @@
     }
 
     // --- DATABASE ---
-    function saveToCloud() {
+    function saveToCloud(uid = null) {
         const user = auth.currentUser;
-        if(user) {
-            db.collection('users').doc(user.uid).set(appData)
+        const targetId = uid || (user ? user.uid : null);
+        if(targetId) {
+            db.collection('users').doc(targetId).set(appData)
             .catch(e => console.error("Hata", e));
         }
     }
@@ -512,7 +549,7 @@
                 checkNewDay();
             } else {
                 appData = JSON.parse(JSON.stringify(defaultData));
-                saveToCloud();
+                saveToCloud(uid);
                 updateUI();
             }
         });
@@ -633,7 +670,6 @@
     }
     function clearHistory() { if(confirm("Clear?")) { appData.history=[]; saveToCloud(); updateUI(); } }
 
-    function showError(msg) { document.getElementById('loginError').style.display='block'; document.getElementById('loginError').innerText = msg; }
     function openNav() { document.getElementById("mySidebar").style.left = "0"; document.getElementById("overlay").style.display="block"; }
     function closeNav() { document.getElementById("mySidebar").style.left = "-270px"; document.getElementById("overlay").style.display="none"; }
     function switchPage(id) { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.getElementById(id).classList.add('active'); closeNav(); }
