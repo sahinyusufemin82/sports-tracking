@@ -53,7 +53,6 @@
         button.primary-btn { width: 100%; background-color: var(--primary); color: white; padding: 14px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         button.secondary-btn { width: 100%; background-color: transparent; border: 1px solid var(--border); color: var(--text); padding: 14px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
         button.text-btn { background: none; border: none; color: var(--text); opacity: 0.7; cursor: pointer; margin-top: 10px; text-decoration: underline; font-size: 14px; }
-        button.danger-btn { background-color: #dc3545; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; margin-top: 5px; font-size: 13px; width: 100%; }
 
         /* UYGULAMA İÇİ */
         #appPage { display: none; }
@@ -108,13 +107,12 @@
                 <input type="password" id="password" placeholder="Şifre">
                 
                 <div id="loginError" class="error-msg"></div>
-                <button id="resendBtn" class="danger-btn" style="display:none;" onclick="resendVerification()">📩 Doğrulama Mailini Tekrar Gönder</button>
 
                 <button class="primary-btn" id="btn_action" onclick="performAuth()">Giriş Yap</button>
                 <button class="text-btn" onclick="goBack()" id="btn_back">← Geri Dön</button>
             </div>
 
-            <div style="margin-top:20px; font-size:12px; opacity:0.6;">FitTakip Global v9.0</div>
+            <div style="margin-top:20px; font-size:12px; opacity:0.6;">FitTakip Global v10.0 (No Verify)</div>
         </div>
     </div>
 
@@ -260,9 +258,7 @@
             endDay: "Günü Bitir", archBtn: "Günü Arşivle",
             
             alert_newDay: "Yeni bir gün başladı!", alert_saved: "Kaydedildi!", alert_added: "Eklendi!",
-            alert_mail_sent: "✅ Doğrulama maili gönderildi!\n\n⚠️ Lütfen SPAM (Gereksiz) klasörünü mutlaka kontrol et.",
-            alert_verify_first: "E-posta adresin henüz doğrulanmamış. Lütfen mailindeki linke tıkla.",
-            spam_check: "Spam kutusunu kontrol etmeyi unutma!",
+            alert_reg_success: "Kayıt Başarılı! Otomatik giriş yapılıyor...",
             lbl_normal: "Normal", lbl_over: "Fazla", lbl_obese: "Obez", lbl_weak: "Zayıf"
         },
         en: {
@@ -286,9 +282,7 @@
             endDay: "End Day", archBtn: "Archive Day",
             
             alert_newDay: "A new day has started!", alert_saved: "Saved!", alert_added: "Added!",
-            alert_mail_sent: "✅ Verification email sent!\n\n⚠️ Please check your SPAM/Junk folder.",
-            alert_verify_first: "Your email is not verified yet. Please click the link in your email.",
-            spam_check: "Don't forget to check your spam folder!",
+            alert_reg_success: "Registration Successful! Logging in...",
             lbl_normal: "Normal", lbl_over: "Overweight", lbl_obese: "Obese", lbl_weak: "Underweight"
         }
     };
@@ -319,17 +313,13 @@
         
         document.getElementById('welcome-buttons').style.display = 'none';
         document.getElementById('auth-forms').style.display = 'block';
-        
-        // Hata mesajlarını temizle
         document.getElementById('loginError').style.display = 'none';
-        document.getElementById('resendBtn').style.display = 'none';
     }
 
     function goBack() {
         document.getElementById('auth-forms').style.display = 'none';
         document.getElementById('welcome-buttons').style.display = 'flex';
         document.getElementById('loginError').style.display = 'none';
-        document.getElementById('resendBtn').style.display = 'none';
         document.getElementById('password').value = '';
     }
 
@@ -338,15 +328,11 @@
         else kayitOl();
     }
 
-    // --- OTURUM YÖNETİMİ (KİLİT NOKTA) ---
-    // Bu kod otomatik giriş içindir. Kullanıcı mailden dönerse çalışır.
+    // --- OTURUM YÖNETİMİ (MAİL ONAYI KALDIRILDI) ---
     auth.onAuthStateChanged(user => {
-        if (user && user.emailVerified) {
-            // Mail Onaylı -> İçeri Al
+        if (user) {
+            // ARTIK KONTROL YOK, DİREKT İÇERİ AL
             enterApp(user);
-        } else if (user && !user.emailVerified) {
-            // Giriş yapmış ama onaylamamış -> Dışarı atma, sadece formda hata göster
-            // (Manuel girisYap fonksiyonu bunu yönetecek, burası sessiz kalabilir)
         } else {
             // Çıkış yapmış
             document.getElementById('loginPage').style.display = 'flex';
@@ -354,40 +340,11 @@
         }
     });
 
-    async function girisYap() {
+    function girisYap() {
         const e = document.getElementById('email').value;
         const p = document.getElementById('password').value;
-        const errBox = document.getElementById('loginError');
-        const resendBtn = document.getElementById('resendBtn');
-
-        try {
-            const userCredential = await auth.signInWithEmailAndPassword(e, p);
-            const user = userCredential.user;
-
-            // ÖNEMLİ: Kullanıcı linke tıkladı mı diye Firebase'i zorla güncelle
-            await user.reload();
-
-            if (user.emailVerified) {
-                // Başarılı
-                enterApp(user);
-            } else {
-                // Hata Göster
-                errBox.style.display = 'block';
-                errBox.innerHTML = langPack[localLang].alert_verify_first;
-                resendBtn.style.display = 'block'; // Tekrar gönder butonu aç
-            }
-        } catch (err) {
-            showError(err.message);
-        }
-    }
-
-    function resendVerification() {
-        const user = auth.currentUser;
-        if(user) {
-            user.sendEmailVerification().then(() => {
-                alert(langPack[localLang].alert_mail_sent);
-            }).catch(err => alert("Hata: " + err.message));
-        }
+        // Düz giriş, hata varsa göster
+        auth.signInWithEmailAndPassword(e, p).catch(err => showError(err.message));
     }
 
     function enterApp(user) {
@@ -405,13 +362,10 @@
         appData.theme = localTheme;
 
         auth.createUserWithEmailAndPassword(e, p).then((cred) => {
-            saveToCloud(cred.user.uid); // ID ile kaydet
-            cred.user.sendEmailVerification().then(() => {
-                alert(langPack[localLang].alert_mail_sent);
-                // Kayıttan sonra giriş ekranına at, otomatik giriş yapma
-                auth.signOut();
-                goBack(); 
-            });
+            saveToCloud(cred.user.uid); 
+            // Mail gönderme yok, direkt başarılı de
+            // (Otomatik onAuthStateChanged tetiklenecek ve içeri alacak)
+            console.log("Kayıt başarılı");
         }).catch(err => showError(err.message));
     }
 
@@ -426,7 +380,7 @@
         errBox.style.display = 'block';
         
         if (msg.includes('email-already-in-use')) {
-            errBox.innerHTML = "⚠️ <b>Bu e-posta zaten kayıtlı!</b><br>Lütfen 'Kayıt Ol' yerine 'Giriş Yap'ı kullan.";
+            errBox.innerHTML = "⚠️ <b>Bu e-posta zaten kayıtlı!</b><br>Lütfen geri dönüp <b>'Giriş Yap'</b> butonunu kullan.";
         } else if (msg.includes('wrong-password')) {
             errBox.innerText = "Hatalı şifre.";
         } else if (msg.includes('user-not-found')) {
@@ -435,8 +389,6 @@
             errBox.innerText = "Geçersiz e-posta formatı.";
         } else if (msg.includes('weak-password')) {
             errBox.innerText = "Şifre çok zayıf (En az 6 karakter).";
-        } else if (msg.includes('too-many-requests')) {
-            errBox.innerText = "Çok fazla deneme yaptınız. Biraz bekleyin.";
         } else {
             errBox.innerText = "Hata: " + msg;
         }
