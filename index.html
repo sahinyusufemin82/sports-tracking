@@ -3,60 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FitTakip Pro</title>
+    <title>FitTakip Pro - Hedef Odaklı</title>
     <style>
         /* GENEL AYARLAR */
-        :root { --primary: #007bff; --bg: #f4f7f6; --text: #333; --sidebar-w: 250px; }
+        :root { --primary: #007bff; --warning: #ffc107; --danger: #dc3545; --success: #28a745; --bg: #f4f7f6; --text: #333; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: var(--text); overflow-x: hidden; }
         
-        /* HEADER (ÜST ÇUBUK) */
+        /* HEADER */
         header { background: white; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; position: sticky; top: 0; z-index: 100; }
         .menu-btn { font-size: 24px; cursor: pointer; margin-right: 15px; background: none; border: none; color: var(--primary); }
         .app-title { font-size: 18px; font-weight: bold; margin: 0; }
         .date-badge { margin-left: auto; font-size: 12px; color: #888; background: #eee; padding: 4px 8px; border-radius: 12px; }
 
-        /* YAN MENÜ (SIDEBAR) */
-        .sidebar { height: 100%; width: var(--sidebar-w); position: fixed; z-index: 200; top: 0; left: -260px; background-color: #343a40; overflow-x: hidden; transition: 0.3s; padding-top: 60px; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
-        .sidebar a { padding: 15px 25px; text-decoration: none; font-size: 16px; color: #f1f1f1; display: block; transition: 0.2s; border-bottom: 1px solid #444; }
-        .sidebar a:hover { background-color: #007bff; color: white; }
-        .sidebar .closebtn { position: absolute; top: 10px; right: 20px; font-size: 36px; margin-left: 50px; background: none; border: none; color: white; cursor: pointer; }
-        
-        /* MENÜ AÇIKKEN ARKA PLAN KARARTMA */
+        /* SIDEBAR */
+        .sidebar { height: 100%; width: 250px; position: fixed; z-index: 200; top: 0; left: -260px; background-color: #343a40; transition: 0.3s; padding-top: 60px; }
+        .sidebar a { padding: 15px 25px; text-decoration: none; font-size: 16px; color: #f1f1f1; display: block; border-bottom: 1px solid #444; }
+        .sidebar a:hover { background-color: var(--primary); }
+        .closebtn { position: absolute; top: 10px; right: 20px; font-size: 36px; color: white; background: none; border: none; cursor: pointer; }
         .overlay { display: none; position: fixed; width: 100%; height: 100%; top: 0; left: 0; background-color: rgba(0,0,0,0.5); z-index: 150; }
 
-        /* SAYFA İÇERİKLERİ (PAGES) */
+        /* SAYFALAR & KARTLAR */
         .page { display: none; padding: 20px; max-width: 600px; margin: 0 auto; animation: fadeIn 0.4s; }
         .page.active { display: block; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* KART TASARIMLARI */
         .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         h2 { margin-top: 0; font-size: 18px; color: var(--primary); border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
 
-        /* FORM ELEMANLARI */
+        /* FORM */
         input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         button.primary-btn { width: 100%; background-color: var(--primary); color: white; padding: 14px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        button.delete-btn { background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 12px; float: right; }
-
-        /* AKTİVİTE LİSTESİ */
-        .task-item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #f0f0f0; }
-        .task-item:last-child { border-bottom: none; }
-        .task-checkbox { width: 24px; height: 24px; margin-right: 15px; cursor: pointer; }
-        .task-content { flex-grow: 1; }
-        .task-title { font-weight: 600; font-size: 15px; }
-        .task-meta { font-size: 12px; color: #777; }
-        .task-link { color: var(--primary); text-decoration: none; font-size: 13px; margin-right: 10px; display: inline-block; margin-top: 4px; }
         
-        /* ÖZET KUTUSU */
-        .summary-stats { display: flex; justify-content: space-around; text-align: center; }
-        .stat-box strong { font-size: 24px; display: block; color: var(--primary); }
-        .stat-box span { font-size: 12px; color: #666; }
+        /* ÖZEL TASARIMLAR (BMI & Hedef) */
+        .weight-alert { background-color: #ffecec; border: 1px solid var(--danger); color: var(--danger); padding: 10px; border-radius: 8px; margin-bottom: 15px; display: none; text-align: center; font-weight: bold; cursor: pointer; }
+        
+        .bmi-box { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+        .bmi-value { font-size: 24px; font-weight: bold; color: var(--primary); }
+        .bmi-label { font-size: 12px; background: #eee; padding: 3px 8px; border-radius: 4px; }
+        
+        .progress-container { margin-top: 10px; }
+        .progress-bar { height: 10px; background-color: #e9ecef; border-radius: 5px; overflow: hidden; }
+        .progress-fill { height: 100%; background-color: var(--success); width: 0%; transition: width 0.5s; }
+        .goal-text { font-size: 12px; color: #666; display: flex; justify-content: space-between; margin-top: 5px; }
 
-        /* TABLO */
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { color: #555; }
+        /* LİSTE */
+        .task-item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #f0f0f0; }
+        .task-checkbox { width: 24px; height: 24px; margin-right: 15px; }
+        .task-content { flex-grow: 1; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -67,337 +60,321 @@
         <button class="closebtn" onclick="closeNav()">&times;</button>
         <div style="text-align:center; padding: 20px; color: #888; font-size: 12px;">MENÜ</div>
         <a href="#" onclick="switchPage('dashboard')">🏠 Ana Sayfa</a>
-        <a href="#" onclick="switchPage('add-activity')">➕ Aktivite Ekle/Sil</a>
-        <a href="#" onclick="switchPage('history')">📜 Geçmiş Kayıtlar</a>
-        <a href="#" onclick="switchPage('profile')">👤 Profil & Ayarlar</a>
+        <a href="#" onclick="switchPage('add-activity')">➕ Aktivite Ekle</a>
+        <a href="#" onclick="switchPage('history')">📜 Geçmiş</a>
+        <a href="#" onclick="switchPage('profile')">👤 Profil & Hedefler</a>
     </div>
 
     <header>
         <button class="menu-btn" onclick="openNav()">&#9776;</button>
-        <p class="app-title">FitTakip</p>
+        <p class="app-title">FitTakip Pro</p>
         <span class="date-badge" id="headerDate">--.--.----</span>
     </header>
 
     <div id="dashboard" class="page active">
+        
+        <div id="weightReminder" class="weight-alert" onclick="switchPage('profile')">
+            ⚠️ Tartılma zamanı geldi! Güncel kilonu girmek için tıkla.
+        </div>
+
         <div class="card">
-            <div class="summary-stats">
-                <div class="stat-box">
-                    <strong id="totalCalDisp">0</strong>
-                    <span>Toplam Kcal</span>
+            <h2>Vücut Durumu</h2>
+            
+            <div class="bmi-box">
+                <div>
+                    <div style="font-size:12px; color:#888;">BMI İndeksi</div>
+                    <div class="bmi-value" id="bmiValue">--</div>
                 </div>
-                <div class="stat-box" style="border-left:1px solid #eee; border-right:1px solid #eee; padding:0 15px;">
-                    <strong id="stepCalDisp">0</strong>
-                    <span>Adım Kcal</span>
+                <div class="bmi-label" id="bmiLabel">Veri Yok</div>
+            </div>
+
+            <div class="progress-container">
+                <div class="goal-text">
+                    <span>Mevcut: <strong id="currentWeightDisplay">--</strong> kg</span>
+                    <span>Hedef: <strong id="targetWeightDisplay">--</strong> kg</span>
                 </div>
-                <div class="stat-box">
-                    <strong id="sportCalDisp">0</strong>
-                    <span>Spor Kcal</span>
+                <div class="progress-bar">
+                    <div id="weightProgress" class="progress-fill"></div>
                 </div>
+                <small style="font-size:10px; color:#999; margin-top:5px; display:block;">Hedefe kalan: <span id="weightDiff">--</span> kg</small>
+            </div>
+        </div>
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-around; text-align: center;">
+                <div><strong id="totalCalDisp" style="color:var(--primary); font-size:20px;">0</strong><br><span style="font-size:12px;">Toplam</span></div>
+                <div><strong id="stepCalDisp" style="color:#666; font-size:20px;">0</strong><br><span style="font-size:12px;">Adım</span></div>
+                <div><strong id="sportCalDisp" style="color:#666; font-size:20px;">0</strong><br><span style="font-size:12px;">Spor</span></div>
             </div>
         </div>
 
         <div class="card">
             <h2>Günün Antrenmanları</h2>
-            <div id="taskListContainer">
-                <p style="text-align:center; color:#999; padding:20px;">Henüz aktivite eklemedin.<br>Menüden "Aktivite Ekle"ye git.</p>
-            </div>
+            <div id="taskListContainer"></div>
         </div>
 
         <div class="card">
             <h2>Adım Sayacı</h2>
-            <input type="number" id="dailyStepsInput" placeholder="Bugünkü adım sayın..." oninput="calculate()">
-            <small style="color:#888;">Kilonuza göre otomatik hesaplanır.</small>
+            <input type="number" id="dailyStepsInput" placeholder="Bugünkü adım..." oninput="calculate()">
         </div>
     </div>
 
     <div id="add-activity" class="page">
         <div class="card">
             <h2>Yeni Aktivite Tanımla</h2>
-            <p style="font-size:13px; color:#666;">Buraya eklediğin aktiviteler Ana Sayfa'da günlük görev olarak görünür.</p>
-            
-            <label>Aktivite Adı</label>
-            <input type="text" id="newActName" placeholder="Örn: 15 Dk Karın Kası">
-
-            <label>YouTube Linki (Opsiyonel)</label>
-            <input type="url" id="newActLink" placeholder="https://youtube.com/...">
-
-            <label>Tahmini Kalori</label>
-            <input type="number" id="newActCal" placeholder="Örn: 150">
-
-            <button class="primary-btn" onclick="addNewActivity()">Listeye Ekle</button>
+            <label>Aktivite Adı</label><input type="text" id="newActName">
+            <label>YouTube Linki</label><input type="url" id="newActLink">
+            <label>Kalori</label><input type="number" id="newActCal">
+            <button class="primary-btn" onclick="addNewActivity()">Ekle</button>
         </div>
-
         <div class="card">
-            <h2>Kayıtlı Aktivitelerim</h2>
-            <div id="manageListContainer">
-                </div>
+            <h2>Listem</h2>
+            <div id="manageListContainer"></div>
         </div>
     </div>
 
     <div id="history" class="page">
         <div class="card">
             <h2>Geçmiş Günlükler</h2>
-            <table id="historyTable">
+            <table style="width:100%; font-size:14px; text-align:left;" id="historyTable">
                 <thead><tr><th>Tarih</th><th>Adım</th><th>Kcal</th></tr></thead>
                 <tbody></tbody>
             </table>
-            <button class="primary-btn" style="background:#6c757d; margin-top:15px;" onclick="clearHistory()">Geçmişi Temizle</button>
+            <button class="primary-btn" style="background:#6c757d;" onclick="clearHistory()">Temizle</button>
         </div>
     </div>
 
     <div id="profile" class="page">
         <div class="card">
             <h2>Vücut Bilgileri</h2>
-            <label>Güncel Kilo (kg)</label>
-            <input type="number" id="userWeight" placeholder="80" onchange="calculate()">
             
             <label>Boy (cm)</label>
-            <input type="number" id="userHeight" placeholder="180" onchange="saveProfile()">
+            <input type="number" id="userHeight" placeholder="180" onchange="calculate()">
+
+            <label>Güncel Kilo (kg)</label>
+            <input type="number" id="userWeight" placeholder="80" onchange="updateWeightDate()">
+
+            <label>Hedef Kilo (kg)</label>
+            <input type="number" id="targetWeight" placeholder="70" onchange="saveData()">
+
+            <label>Kilo Takip Sıklığı</label>
+            <select id="weightFreq" onchange="saveData()">
+                <option value="7">Haftada Bir (7 Gün)</option>
+                <option value="30">Ayda Bir (30 Gün)</option>
+            </select>
             
-            <button class="primary-btn" onclick="saveProfile(); alert('Bilgiler Kaydedildi!');">Kaydet</button>
+            <button class="primary-btn" onclick="saveData(); alert('Profil Kaydedildi!'); updateUI();">Bilgileri Kaydet</button>
         </div>
-        
+
         <div class="card">
-            <h2>Günü Manuel Bitir</h2>
-            <p style="font-size:13px; color:#666;">Gece 00:00'da sistem otomatik yeni güne geçer. Beklemek istemiyorsan:</p>
-            <button class="primary-btn" style="background:#ff9800;" onclick="forceEndDay()">Günü Bitir ve Arşivle</button>
+            <h2>Günü Bitir</h2>
+            <button class="primary-btn" style="background:#ff9800;" onclick="forceEndDay()">Günü Arşivle ve Bitir</button>
         </div>
     </div>
 
 <script>
     // --- VERİ YAPISI ---
     let appData = {
-        activities: [], // {id, name, link, cal, completed}
+        activities: [], 
         history: [],
-        weight: 80,
-        height: 180,
+        weight: 0,
+        height: 0,
+        targetWeight: 0,
+        weightFreq: 7, // 7 gün veya 30 gün
+        lastWeightUpdate: null, // "2023-10-27" formatında string
         dailySteps: 0,
         lastDate: new Date().toLocaleDateString('tr-TR')
     };
 
-    // --- BAŞLANGIÇ ---
     document.addEventListener('DOMContentLoaded', () => {
         loadData();
         checkNewDay();
         updateUI();
-        
-        // Tarihi yazdır
         document.getElementById('headerDate').innerText = appData.lastDate;
     });
 
-    // --- MENÜ VE SAYFA GEÇİŞLERİ ---
-    function openNav() {
-        document.getElementById("mySidebar").style.left = "0";
-        document.getElementById("overlay").style.display = "block";
-    }
-    function closeNav() {
-        document.getElementById("mySidebar").style.left = "-260px";
-        document.getElementById("overlay").style.display = "none";
-    }
+    // --- MENÜ ---
+    function openNav() { document.getElementById("mySidebar").style.left = "0"; document.getElementById("overlay").style.display = "block"; }
+    function closeNav() { document.getElementById("mySidebar").style.left = "-260px"; document.getElementById("overlay").style.display = "none"; }
     function switchPage(pageId) {
-        // Tüm sayfaları gizle
         document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-        // Seçileni göster
         document.getElementById(pageId).classList.add('active');
-        closeNav(); // Menüyü kapat
-        updateUI(); // Ekranı yenile
+        closeNav();
+        updateUI();
     }
 
-    // --- ANA FONKSİYONLAR ---
+    // --- TEMEL İŞLEVLER ---
+    function updateWeightDate() {
+        // Kullanıcı kiloyu değiştirdiğinde, son güncelleme tarihini BUGÜN yap
+        appData.lastWeightUpdate = new Date().toISOString().split('T')[0];
+        calculate();
+    }
 
+    function calculate() {
+        // Formdan verileri al
+        appData.weight = parseFloat(document.getElementById('userWeight').value) || 0;
+        appData.height = parseFloat(document.getElementById('userHeight').value) || 0;
+        appData.targetWeight = parseFloat(document.getElementById('targetWeight').value) || 0;
+        appData.weightFreq = parseInt(document.getElementById('weightFreq').value) || 7;
+        appData.dailySteps = parseInt(document.getElementById('dailyStepsInput').value) || 0;
+
+        // Kalori Hesapla
+        const stepCals = Math.round(appData.dailySteps * 0.0005 * appData.weight);
+        let sportCals = 0;
+        appData.activities.forEach(a => { if(a.completed) sportCals += a.cal; });
+        const total = stepCals + sportCals;
+
+        // Ekrana Kalori Yaz
+        document.getElementById('totalCalDisp').innerText = total;
+        document.getElementById('stepCalDisp').innerText = stepCals;
+        document.getElementById('sportCalDisp').innerText = sportCals;
+
+        // BMI ve Hedef Hesapla
+        calculateBMI();
+        checkWeightReminder();
+        saveData();
+    }
+
+    function calculateBMI() {
+        // BMI = kg / (m * m)
+        if(appData.weight > 0 && appData.height > 0) {
+            const heightInMeters = appData.height / 100;
+            const bmi = (appData.weight / (heightInMeters * heightInMeters)).toFixed(1);
+            
+            let label = "";
+            let color = "gray";
+
+            if(bmi < 18.5) { label = "Zayıf"; color = "#17a2b8"; }
+            else if(bmi < 25) { label = "Normal"; color = "#28a745"; }
+            else if(bmi < 30) { label = "Fazla Kilolu"; color = "#ffc107"; }
+            else { label = "Obez"; color = "#dc3545"; }
+
+            document.getElementById('bmiValue').innerText = bmi;
+            document.getElementById('bmiLabel').innerText = label;
+            document.getElementById('bmiLabel').style.backgroundColor = color;
+            document.getElementById('bmiLabel').style.color = "white";
+        }
+
+        // Hedef Kilo Barı
+        document.getElementById('currentWeightDisplay').innerText = appData.weight;
+        document.getElementById('targetWeightDisplay').innerText = appData.targetWeight;
+
+        if(appData.weight > 0 && appData.targetWeight > 0) {
+            const diff = (appData.weight - appData.targetWeight).toFixed(1);
+            document.getElementById('weightDiff').innerText = Math.abs(diff);
+
+            // Basit bir görselleştirme: Kilo vermeye çalışıyorsa
+            if(appData.weight > appData.targetWeight) {
+                // Hedefe ne kadar yaklaştık? (Farazi bir başlangıç noktası olmadan tam yüzde veremeyiz ama görsel bir doluluk yapabiliriz)
+                // Şimdilik sadece hedef ile mevcut arasındaki farkı göstermeyelim, dolu gösterelim.
+                document.getElementById('weightProgress').style.width = "100%"; 
+                document.getElementById('weightProgress').style.backgroundColor = "#007bff";
+            } else {
+                // Kilo almaya çalışıyorsa veya hedefteyse
+                document.getElementById('weightProgress').style.width = "100%";
+                document.getElementById('weightProgress').style.backgroundColor = "#28a745";
+            }
+        }
+    }
+
+    function checkWeightReminder() {
+        if(!appData.lastWeightUpdate) return; // Henüz hiç girilmemiş
+
+        const lastDate = new Date(appData.lastWeightUpdate);
+        const today = new Date();
+        const diffTime = Math.abs(today - lastDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+        // Eğer geçen gün sayısı seçilen frekansdan fazlaysa uyarı göster
+        const alertBox = document.getElementById('weightReminder');
+        if(diffDays > appData.weightFreq) {
+            alertBox.style.display = 'block';
+            alertBox.innerHTML = `⚠️ <strong>${diffDays} gündür</strong> tartılmadın! Güncellemek için tıkla.`;
+        } else {
+            alertBox.style.display = 'none';
+        }
+    }
+
+    // --- SİSTEM ---
     function addNewActivity() {
         const name = document.getElementById('newActName').value;
         const link = document.getElementById('newActLink').value;
         const cal = parseInt(document.getElementById('newActCal').value);
-
-        if(!name || !cal) { alert("Lütfen isim ve kalori girin."); return; }
-
-        appData.activities.push({
-            id: Date.now(),
-            name: name,
-            link: link,
-            cal: cal,
-            completed: false
-        });
-
-        saveData();
-        updateUI();
-        alert("Aktivite Eklendi!");
-        
-        // Inputları temizle
-        document.getElementById('newActName').value = '';
-        document.getElementById('newActLink').value = '';
-        document.getElementById('newActCal').value = '';
+        if(!name || !cal) { alert("Eksik bilgi!"); return; }
+        appData.activities.push({ id: Date.now(), name, link, cal, completed: false });
+        saveData(); updateUI();
+        document.getElementById('newActName').value = ''; document.getElementById('newActLink').value = ''; document.getElementById('newActCal').value = '';
+        alert("Eklendi!");
     }
 
     function toggleTask(id) {
-        const task = appData.activities.find(a => a.id === id);
-        if(task) {
-            task.completed = !task.completed;
-            saveData();
-            calculate(); // Sadece sayıları güncelle, listeyi yeniden çizme (titremesin)
-            renderTaskList(); // Görseli güncelle (çizik atmak için)
-        }
+        const t = appData.activities.find(a => a.id === id);
+        if(t) { t.completed = !t.completed; saveData(); calculate(); renderTaskList(); }
     }
-
+    
     function deleteTask(id) {
-        if(confirm("Bu aktiviteyi silmek istiyor musun?")) {
-            appData.activities = appData.activities.filter(a => a.id !== id);
-            saveData();
-            updateUI();
-        }
-    }
-
-    function calculate() {
-        // Verileri al
-        appData.weight = parseFloat(document.getElementById('userWeight').value) || 0;
-        appData.dailySteps = parseInt(document.getElementById('dailyStepsInput').value) || 0;
-
-        // Hesapla
-        const stepCals = Math.round(appData.dailySteps * 0.0005 * appData.weight);
-        let sportCals = 0;
-        appData.activities.forEach(a => { if(a.completed) sportCals += a.cal; });
-        const total = stepCals + sportCals;
-
-        // Ekrana Yaz
-        document.getElementById('totalCalDisp').innerText = total;
-        document.getElementById('stepCalDisp').innerText = stepCals;
-        document.getElementById('sportCalDisp').innerText = sportCals;
-        
-        saveData();
-    }
-
-    // --- GÜNCELLEME (RENDER) ---
-    function updateUI() {
-        renderTaskList();
-        renderManageList();
-        renderHistory();
-        
-        // Input değerlerini doldur
-        document.getElementById('userWeight').value = appData.weight;
-        document.getElementById('userHeight').value = appData.height || 180;
-        document.getElementById('dailyStepsInput').value = appData.dailySteps > 0 ? appData.dailySteps : '';
-        
-        calculate();
+        if(confirm("Silinsin mi?")) { appData.activities = appData.activities.filter(a => a.id !== id); saveData(); updateUI(); }
     }
 
     function renderTaskList() {
-        const container = document.getElementById('taskListContainer');
-        container.innerHTML = '';
-        
-        if(appData.activities.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">Henüz aktivite yok.</p>';
-            return;
-        }
-
-        appData.activities.forEach(act => {
-            const isChecked = act.completed ? 'checked' : '';
-            const lineThrough = act.completed ? 'text-decoration:line-through; color:#aaa;' : '';
-            
-            const html = `
-                <div class="task-item">
-                    <input type="checkbox" class="task-checkbox" ${isChecked} onchange="toggleTask(${act.id})">
-                    <div class="task-content">
-                        <div class="task-title" style="${lineThrough}">${act.name}</div>
-                        <div class="task-meta">${act.cal} kcal</div>
-                        ${act.link ? `<a href="${act.link}" target="_blank" class="task-link">▶ Videoyu Aç</a>` : ''}
-                    </div>
+        const c = document.getElementById('taskListContainer'); c.innerHTML = '';
+        appData.activities.forEach(a => {
+            c.innerHTML += `
+            <div class="task-item">
+                <input type="checkbox" class="task-checkbox" ${a.completed ? 'checked' : ''} onchange="toggleTask(${a.id})">
+                <div class="task-content">
+                    <div style="${a.completed ? 'text-decoration:line-through;color:#aaa' : 'font-weight:600'}">${a.name}</div>
+                    <small>${a.cal} kcal</small> ${a.link ? `<a href="${a.link}" target="_blank" style="color:#007bff;margin-left:5px;">▶ İzle</a>` : ''}
                 </div>
-            `;
-            container.innerHTML += html;
+            </div>`;
         });
     }
 
     function renderManageList() {
-        const container = document.getElementById('manageListContainer');
-        container.innerHTML = '';
-        appData.activities.forEach(act => {
-            container.innerHTML += `
-                <div class="task-item">
-                    <div class="task-content">
-                        <strong>${act.name}</strong> (${act.cal} kcal)
-                    </div>
-                    <button class="delete-btn" onclick="deleteTask(${act.id})">Sil</button>
-                </div>
-            `;
-        });
+        const c = document.getElementById('manageListContainer'); c.innerHTML = '';
+        appData.activities.forEach(a => c.innerHTML += `<div class="task-item"><div><strong>${a.name}</strong> (${a.cal} kcal)</div><button style="background:#dc3545;color:white;border:none;padding:5px;" onclick="deleteTask(${a.id})">Sil</button></div>`);
     }
 
-    function renderHistory() {
-        const tbody = document.querySelector('#historyTable tbody');
-        tbody.innerHTML = '';
-        appData.history.forEach(log => {
-            tbody.innerHTML += `<tr><td>${log.date}</td><td>${log.steps}</td><td>${log.total} kcal</td></tr>`;
-        });
+    function updateUI() {
+        document.getElementById('userWeight').value = appData.weight || '';
+        document.getElementById('userHeight').value = appData.height || '';
+        document.getElementById('targetWeight').value = appData.targetWeight || '';
+        document.getElementById('weightFreq').value = appData.weightFreq || 7;
+        document.getElementById('dailyStepsInput').value = appData.dailySteps || '';
+        
+        renderTaskList(); renderManageList(); 
+        const tb = document.querySelector('#historyTable tbody'); tb.innerHTML = '';
+        appData.history.forEach(h => tb.innerHTML += `<tr><td>${h.date}</td><td>${h.steps}</td><td>${h.total} kcal</td></tr>`);
+        
+        calculate(); // BMI ve Kalori hesaplarını tetikle
     }
-
-    // --- YENİ GÜN & KAYIT SİSTEMİ ---
 
     function checkNewDay() {
         const today = new Date().toLocaleDateString('tr-TR');
         if(appData.lastDate !== today) {
-            // Gün değişmiş, arşive at
-            archiveCurrentDay(appData.lastDate);
+            archiveDay(appData.lastDate);
             appData.lastDate = today;
-            // Sıfırla
             appData.dailySteps = 0;
             appData.activities.forEach(a => a.completed = false);
             saveData();
-            alert("Yeni bir gün! Skorların sıfırlandı, iyi şanslar! ☀️");
+            alert("Yeni gün başladı! Bol şans.");
         }
     }
 
     function forceEndDay() {
-        if(confirm("Günü şimdi bitirip arşive kaydetmek istiyor musun?")) {
-            archiveCurrentDay(appData.lastDate + " (Manuel)");
-            appData.dailySteps = 0;
-            appData.activities.forEach(a => a.completed = false);
-            saveData();
-            updateUI();
-            switchPage('history');
-        }
+        if(confirm("Günü bitir?")) { archiveDay(appData.lastDate + " (Manuel)"); appData.dailySteps=0; appData.activities.forEach(a=>a.completed=false); saveData(); updateUI(); }
     }
 
-    function archiveCurrentDay(dateLabel) {
-        // Hesapla
-        const stepCals = Math.round(appData.dailySteps * 0.0005 * appData.weight);
-        let sportCals = 0;
-        appData.activities.forEach(a => { if(a.completed) sportCals += a.cal; });
-        const total = stepCals + sportCals;
-
-        if(total > 0) { // Sadece veri varsa kaydet
-            appData.history.unshift({
-                date: dateLabel,
-                steps: appData.dailySteps,
-                total: total
-            });
-        }
-    }
-
-    function saveData() {
-        appData.height = document.getElementById('userHeight').value;
-        localStorage.setItem('fitTakipData', JSON.stringify(appData));
-    }
-
-    function loadData() {
-        const saved = localStorage.getItem('fitTakipData');
-        if(saved) {
-            appData = JSON.parse(saved);
-        }
+    function archiveDay(d) {
+        const s = Math.round(appData.dailySteps * 0.0005 * appData.weight);
+        let sp = 0; appData.activities.forEach(a => { if(a.completed) sp += a.cal; });
+        if(s+sp > 0) appData.history.unshift({ date: d, steps: appData.dailySteps, total: s+sp });
     }
     
-    function saveProfile() {
-        saveData();
-    }
-    
-    function clearHistory() {
-        if(confirm("Geçmiş silinsin mi?")) {
-            appData.history = [];
-            saveData();
-            updateUI();
-        }
-    }
+    function clearHistory() { if(confirm("Geçmiş silinsin mi?")) { appData.history=[]; saveData(); updateUI(); } }
 
+    function saveData() { localStorage.setItem('fitProData_v3', JSON.stringify(appData)); }
+    function loadData() { const d = localStorage.getItem('fitProData_v3'); if(d) appData = JSON.parse(d); }
 </script>
 
 </body>
