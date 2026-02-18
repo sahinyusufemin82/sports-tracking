@@ -2,288 +2,402 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spor & Kalori Takip (Geçmiş Özellikli)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FitTakip Pro</title>
     <style>
-        /* TASARIM KISMI (CSS) */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1, h2, h3 { text-align: center; color: #333; }
-        .section { margin-bottom: 30px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; position: relative; }
+        /* GENEL AYARLAR */
+        :root { --primary: #007bff; --bg: #f4f7f6; --text: #333; --sidebar-w: 250px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: var(--text); overflow-x: hidden; }
         
-        /* Form Elemanları */
-        label { display: block; margin-top: 10px; font-weight: bold; color: #555; }
-        input[type="text"], input[type="number"], input[type="url"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px; width: 100%; font-size: 16px; transition: 0.3s; }
-        button:hover { background-color: #218838; }
-        button.delete-btn { background-color: #dc3545; width: auto; padding: 5px 10px; font-size: 12px; margin-left: 10px; }
-        
-        /* Manuel Günü Bitir Butonu (Opsiyonel) */
-        .manual-save-btn { background-color: #007bff; margin-top: 20px; }
-        .manual-save-btn:hover { background-color: #0056b3; }
+        /* HEADER (ÜST ÇUBUK) */
+        header { background: white; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .menu-btn { font-size: 24px; cursor: pointer; margin-right: 15px; background: none; border: none; color: var(--primary); }
+        .app-title { font-size: 18px; font-weight: bold; margin: 0; }
+        .date-badge { margin-left: auto; font-size: 12px; color: #888; background: #eee; padding: 4px 8px; border-radius: 12px; }
 
-        /* Aktivite Listesi */
-        .activity-item { display: flex; align-items: center; justify-content: space-between; background: #f9f9f9; padding: 10px; margin-top: 10px; border-radius: 5px; border-left: 5px solid #007bff; }
-        .activity-info { flex-grow: 1; margin-left: 10px; }
-        .activity-link { color: #007bff; text-decoration: none; font-size: 14px; margin-right: 10px; }
+        /* YAN MENÜ (SIDEBAR) */
+        .sidebar { height: 100%; width: var(--sidebar-w); position: fixed; z-index: 200; top: 0; left: -260px; background-color: #343a40; overflow-x: hidden; transition: 0.3s; padding-top: 60px; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
+        .sidebar a { padding: 15px 25px; text-decoration: none; font-size: 16px; color: #f1f1f1; display: block; transition: 0.2s; border-bottom: 1px solid #444; }
+        .sidebar a:hover { background-color: #007bff; color: white; }
+        .sidebar .closebtn { position: absolute; top: 10px; right: 20px; font-size: 36px; margin-left: 50px; background: none; border: none; color: white; cursor: pointer; }
         
-        /* Kalori Özeti Kartı */
-        .summary-box { background-color: #343a40; color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
-        .big-number { font-size: 3em; font-weight: bold; color: #ffc107; }
-        
-        /* Checkbox Tasarımı */
-        input[type="checkbox"] { transform: scale(1.5); cursor: pointer; }
+        /* MENÜ AÇIKKEN ARKA PLAN KARARTMA */
+        .overlay { display: none; position: fixed; width: 100%; height: 100%; top: 0; left: 0; background-color: rgba(0,0,0,0.5); z-index: 150; }
 
-        /* GEÇMİŞ TABLOSU */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #f2f2f2; color: #333; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .date-badge { background: #6c757d; color: white; padding: 3px 8px; border-radius: 10px; font-size: 12px; }
+        /* SAYFA İÇERİKLERİ (PAGES) */
+        .page { display: none; padding: 20px; max-width: 600px; margin: 0 auto; animation: fadeIn 0.4s; }
+        .page.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* KART TASARIMLARI */
+        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        h2 { margin-top: 0; font-size: 18px; color: var(--primary); border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
+
+        /* FORM ELEMANLARI */
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button.primary-btn { width: 100%; background-color: var(--primary); color: white; padding: 14px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        button.delete-btn { background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 12px; float: right; }
+
+        /* AKTİVİTE LİSTESİ */
+        .task-item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #f0f0f0; }
+        .task-item:last-child { border-bottom: none; }
+        .task-checkbox { width: 24px; height: 24px; margin-right: 15px; cursor: pointer; }
+        .task-content { flex-grow: 1; }
+        .task-title { font-weight: 600; font-size: 15px; }
+        .task-meta { font-size: 12px; color: #777; }
+        .task-link { color: var(--primary); text-decoration: none; font-size: 13px; margin-right: 10px; display: inline-block; margin-top: 4px; }
+        
+        /* ÖZET KUTUSU */
+        .summary-stats { display: flex; justify-content: space-around; text-align: center; }
+        .stat-box strong { font-size: 24px; display: block; color: var(--primary); }
+        .stat-box span { font-size: 12px; color: #666; }
+
+        /* TABLO */
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { color: #555; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>📅 Gelişmiş Spor Takipçisi</h1>
-    <p style="text-align:center; color:gray;">Bugün: <span id="displayDate" style="font-weight:bold; color:black;"></span></p>
+    <div id="overlay" class="overlay" onclick="closeNav()"></div>
 
-    <div class="summary-box">
-        <h3>Bugünkü Toplam Yakım</h3>
-        <div class="big-number"><span id="totalCalories">0</span> kcal</div>
-        <p>Adım: <span id="stepCalories">0</span> + Spor: <span id="sportCalories">0</span></p>
+    <div id="mySidebar" class="sidebar">
+        <button class="closebtn" onclick="closeNav()">&times;</button>
+        <div style="text-align:center; padding: 20px; color: #888; font-size: 12px;">MENÜ</div>
+        <a href="#" onclick="switchPage('dashboard')">🏠 Ana Sayfa</a>
+        <a href="#" onclick="switchPage('add-activity')">➕ Aktivite Ekle/Sil</a>
+        <a href="#" onclick="switchPage('history')">📜 Geçmiş Kayıtlar</a>
+        <a href="#" onclick="switchPage('profile')">👤 Profil & Ayarlar</a>
     </div>
 
-    <div class="section">
-        <h2>Bugünün Görevleri</h2>
-        <div id="activityList">
-            </div>
-        
-        <hr>
-        
-        <label>Bugün Atılan Adım Sayısı:</label>
-        <input type="number" id="dailySteps" placeholder="0" oninput="calculateTotal()">
-        
-        <button class="manual-save-btn" onclick="forceEndDay()">✅ Günü Manuel Bitir ve Kaydet</button>
-        <small style="display:block; text-align:center; margin-top:5px; color:gray;">(Otomatik olarak gece 00:00'dan sonra zaten kaydeder. İstersen buna basarak günü şimdiden kapatabilirsin.)</small>
-    </div>
+    <header>
+        <button class="menu-btn" onclick="openNav()">&#9776;</button>
+        <p class="app-title">FitTakip</p>
+        <span class="date-badge" id="headerDate">--.--.----</span>
+    </header>
 
-    <div class="section">
-        <h2>Ayarlar ve Aktivite Ekleme</h2>
-        <div style="display: flex; gap: 10px;">
-            <div style="flex:1;">
-                <label>Kilo (kg):</label>
-                <input type="number" id="userWeight" placeholder="80" onchange="calculateTotal()">
-            </div>
-            <div style="flex:2;">
-                <label>Yeni Aktivite Adı:</label>
-                <input type="text" id="newActName" placeholder="Örn: Mekik">
-            </div>
-            <div style="flex:1;">
-                <label>Kalori:</label>
-                <input type="number" id="newActCals" placeholder="100">
+    <div id="dashboard" class="page active">
+        <div class="card">
+            <div class="summary-stats">
+                <div class="stat-box">
+                    <strong id="totalCalDisp">0</strong>
+                    <span>Toplam Kcal</span>
+                </div>
+                <div class="stat-box" style="border-left:1px solid #eee; border-right:1px solid #eee; padding:0 15px;">
+                    <strong id="stepCalDisp">0</strong>
+                    <span>Adım Kcal</span>
+                </div>
+                <div class="stat-box">
+                    <strong id="sportCalDisp">0</strong>
+                    <span>Spor Kcal</span>
+                </div>
             </div>
         </div>
-        <input type="url" id="newActLink" placeholder="Varsa YouTube Linki..." style="margin-top:5px;">
-        <button onclick="addActivity()" style="background-color:#6c757d;">Listeye Yeni Spor Ekle</button>
+
+        <div class="card">
+            <h2>Günün Antrenmanları</h2>
+            <div id="taskListContainer">
+                <p style="text-align:center; color:#999; padding:20px;">Henüz aktivite eklemedin.<br>Menüden "Aktivite Ekle"ye git.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Adım Sayacı</h2>
+            <input type="number" id="dailyStepsInput" placeholder="Bugünkü adım sayın..." oninput="calculate()">
+            <small style="color:#888;">Kilonuza göre otomatik hesaplanır.</small>
+        </div>
     </div>
 
-    <div class="section">
-        <h2>📜 Geçmiş Günlükler</h2>
-        <table id="historyTable">
-            <thead>
-                <tr>
-                    <th>Tarih</th>
-                    <th>Adım</th>
-                    <th>Toplam Kalori</th>
-                    <th>Durum</th>
-                </tr>
-            </thead>
-            <tbody>
-                </tbody>
-        </table>
-        <button onclick="clearHistory()" class="delete-btn" style="width:100%; margin-top:10px;">Geçmişi Temizle</button>
+    <div id="add-activity" class="page">
+        <div class="card">
+            <h2>Yeni Aktivite Tanımla</h2>
+            <p style="font-size:13px; color:#666;">Buraya eklediğin aktiviteler Ana Sayfa'da günlük görev olarak görünür.</p>
+            
+            <label>Aktivite Adı</label>
+            <input type="text" id="newActName" placeholder="Örn: 15 Dk Karın Kası">
+
+            <label>YouTube Linki (Opsiyonel)</label>
+            <input type="url" id="newActLink" placeholder="https://youtube.com/...">
+
+            <label>Tahmini Kalori</label>
+            <input type="number" id="newActCal" placeholder="Örn: 150">
+
+            <button class="primary-btn" onclick="addNewActivity()">Listeye Ekle</button>
+        </div>
+
+        <div class="card">
+            <h2>Kayıtlı Aktivitelerim</h2>
+            <div id="manageListContainer">
+                </div>
+        </div>
     </div>
-</div>
+
+    <div id="history" class="page">
+        <div class="card">
+            <h2>Geçmiş Günlükler</h2>
+            <table id="historyTable">
+                <thead><tr><th>Tarih</th><th>Adım</th><th>Kcal</th></tr></thead>
+                <tbody></tbody>
+            </table>
+            <button class="primary-btn" style="background:#6c757d; margin-top:15px;" onclick="clearHistory()">Geçmişi Temizle</button>
+        </div>
+    </div>
+
+    <div id="profile" class="page">
+        <div class="card">
+            <h2>Vücut Bilgileri</h2>
+            <label>Güncel Kilo (kg)</label>
+            <input type="number" id="userWeight" placeholder="80" onchange="calculate()">
+            
+            <label>Boy (cm)</label>
+            <input type="number" id="userHeight" placeholder="180" onchange="saveProfile()">
+            
+            <button class="primary-btn" onclick="saveProfile(); alert('Bilgiler Kaydedildi!');">Kaydet</button>
+        </div>
+        
+        <div class="card">
+            <h2>Günü Manuel Bitir</h2>
+            <p style="font-size:13px; color:#666;">Gece 00:00'da sistem otomatik yeni güne geçer. Beklemek istemiyorsan:</p>
+            <button class="primary-btn" style="background:#ff9800;" onclick="forceEndDay()">Günü Bitir ve Arşivle</button>
+        </div>
+    </div>
 
 <script>
-    /* MANTIK KISMI 
-       Bu kod, sayfa her açıldığında tarihe bakar. 
-       Eğer tarih değişmişse, eski veriyi tabloya atar ve ekranı sıfırlar.
-    */
+    // --- VERİ YAPISI ---
+    let appData = {
+        activities: [], // {id, name, link, cal, completed}
+        history: [],
+        weight: 80,
+        height: 180,
+        dailySteps: 0,
+        lastDate: new Date().toLocaleDateString('tr-TR')
+    };
 
-    let activities = [];
-    let historyLog = [];
-    let currentDate = new Date().toLocaleDateString('tr-TR');
-
-    document.getElementById('displayDate').innerText = currentDate;
-
-    // Uygulama Başlangıcı
+    // --- BAŞLANGIÇ ---
     document.addEventListener('DOMContentLoaded', () => {
         loadData();
-        checkNewDay(); // ÖNEMLİ: Yeni gün kontrolü yap
-        renderActivities();
-        calculateTotal();
-        renderHistory();
+        checkNewDay();
+        updateUI();
+        
+        // Tarihi yazdır
+        document.getElementById('headerDate').innerText = appData.lastDate;
     });
 
-    // 1. Yeni Gün Kontrolü (00:00 Mantığı)
-    function checkNewDay() {
-        const lastSavedDate = localStorage.getItem('last_active_date');
-
-        // Eğer daha önce kaydedilmiş bir tarih varsa VE bugün o tarih değilse
-        if (lastSavedDate && lastSavedDate !== currentDate) {
-            alert("Yeni bir gün! Dünkü verilerin geçmişe kaydedildi ve liste sıfırlandı. ☀️");
-            archiveDay(lastSavedDate); // Eski günü arşive at
-        }
-        
-        // Bugünün tarihini kaydet (ki sonraki girişte kontrol edebilelim)
-        localStorage.setItem('last_active_date', currentDate);
+    // --- MENÜ VE SAYFA GEÇİŞLERİ ---
+    function openNav() {
+        document.getElementById("mySidebar").style.left = "0";
+        document.getElementById("overlay").style.display = "block";
+    }
+    function closeNav() {
+        document.getElementById("mySidebar").style.left = "-260px";
+        document.getElementById("overlay").style.display = "none";
+    }
+    function switchPage(pageId) {
+        // Tüm sayfaları gizle
+        document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+        // Seçileni göster
+        document.getElementById(pageId).classList.add('active');
+        closeNav(); // Menüyü kapat
+        updateUI(); // Ekranı yenile
     }
 
-    // 2. Günü Arşivleme Fonksiyonu
-    function archiveDay(dateLabel) {
-        // Şu anki toplamları hesapla (hafızadaki veriden)
-        let totalCals = parseInt(document.getElementById('totalCalories').innerText) || 0;
-        let steps = parseInt(document.getElementById('dailySteps').value) || 0;
+    // --- ANA FONKSİYONLAR ---
 
-        // Geçmiş dizisine ekle
-        const log = {
-            date: dateLabel,
-            steps: steps,
-            calories: totalCals,
-            note: "Tamamlandı"
-        };
+    function addNewActivity() {
+        const name = document.getElementById('newActName').value;
+        const link = document.getElementById('newActLink').value;
+        const cal = parseInt(document.getElementById('newActCal').value);
+
+        if(!name || !cal) { alert("Lütfen isim ve kalori girin."); return; }
+
+        appData.activities.push({
+            id: Date.now(),
+            name: name,
+            link: link,
+            cal: cal,
+            completed: false
+        });
+
+        saveData();
+        updateUI();
+        alert("Aktivite Eklendi!");
         
-        historyLog.unshift(log); // En başa ekle (yeni tarih üstte olsun)
-        
-        // EKRANI SIFIRLA
-        document.getElementById('dailySteps').value = ''; 
-        activities.forEach(act => act.completed = false); // Tüm tikleri kaldır
+        // Inputları temizle
+        document.getElementById('newActName').value = '';
+        document.getElementById('newActLink').value = '';
+        document.getElementById('newActCal').value = '';
+    }
+
+    function toggleTask(id) {
+        const task = appData.activities.find(a => a.id === id);
+        if(task) {
+            task.completed = !task.completed;
+            saveData();
+            calculate(); // Sadece sayıları güncelle, listeyi yeniden çizme (titremesin)
+            renderTaskList(); // Görseli güncelle (çizik atmak için)
+        }
+    }
+
+    function deleteTask(id) {
+        if(confirm("Bu aktiviteyi silmek istiyor musun?")) {
+            appData.activities = appData.activities.filter(a => a.id !== id);
+            saveData();
+            updateUI();
+        }
+    }
+
+    function calculate() {
+        // Verileri al
+        appData.weight = parseFloat(document.getElementById('userWeight').value) || 0;
+        appData.dailySteps = parseInt(document.getElementById('dailyStepsInput').value) || 0;
+
+        // Hesapla
+        const stepCals = Math.round(appData.dailySteps * 0.0005 * appData.weight);
+        let sportCals = 0;
+        appData.activities.forEach(a => { if(a.completed) sportCals += a.cal; });
+        const total = stepCals + sportCals;
+
+        // Ekrana Yaz
+        document.getElementById('totalCalDisp').innerText = total;
+        document.getElementById('stepCalDisp').innerText = stepCals;
+        document.getElementById('sportCalDisp').innerText = sportCals;
         
         saveData();
+    }
+
+    // --- GÜNCELLEME (RENDER) ---
+    function updateUI() {
+        renderTaskList();
+        renderManageList();
         renderHistory();
-        renderActivities();
-        calculateTotal();
+        
+        // Input değerlerini doldur
+        document.getElementById('userWeight').value = appData.weight;
+        document.getElementById('userHeight').value = appData.height || 180;
+        document.getElementById('dailyStepsInput').value = appData.dailySteps > 0 ? appData.dailySteps : '';
+        
+        calculate();
     }
 
-    // 3. Manuel Olarak Günü Bitirme
-    function forceEndDay() {
-        if(confirm("Günü bitirmek istediğine emin misin? Mevcut skorun geçmişe kaydedilecek ve sayaçlar sıfırlanacak.")) {
-            archiveDay(currentDate + " (Manuel)");
-        }
-    }
-
-    // 4. Geçmişi Ekrana Yazdırma
-    function renderHistory() {
-        const tbody = document.querySelector('#historyTable tbody');
-        tbody.innerHTML = '';
-
-        if(historyLog.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4">Henüz geçmiş kayıt yok.</td></tr>';
+    function renderTaskList() {
+        const container = document.getElementById('taskListContainer');
+        container.innerHTML = '';
+        
+        if(appData.activities.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">Henüz aktivite yok.</p>';
             return;
         }
 
-        historyLog.forEach(log => {
-            const row = `
-                <tr>
-                    <td><span class="date-badge">${log.date}</span></td>
-                    <td>${log.steps}</td>
-                    <td style="font-weight:bold; color:#28a745;">${log.calories} kcal</td>
-                    <td>✅</td>
-                </tr>
-            `;
-            tbody.innerHTML += row;
-        });
-    }
-
-    // --- ESKİ TEMEL FONKSİYONLAR (Aynen Korundu) ---
-
-    function addActivity() {
-        const name = document.getElementById('newActName').value;
-        const link = document.getElementById('newActLink').value;
-        const cals = parseInt(document.getElementById('newActCals').value);
-
-        if (!name || !cals) return alert("İsim ve kalori gerekli!");
-
-        activities.push({ id: Date.now(), name, link, cals, completed: false });
-        saveData(); renderActivities();
-        
-        document.getElementById('newActName').value = '';
-        document.getElementById('newActLink').value = '';
-        document.getElementById('newActCals').value = '';
-    }
-
-    function renderActivities() {
-        const list = document.getElementById('activityList');
-        list.innerHTML = '';
-        activities.forEach(act => {
-            list.innerHTML += `
-                <div class="activity-item" style="opacity:${act.completed ? '0.6' : '1'}">
-                    <input type="checkbox" ${act.completed ? 'checked' : ''} onchange="toggleActivity(${act.id})">
-                    <div class="activity-info">
-                        <strong style="${act.completed ? 'text-decoration:line-through' : ''}">${act.name}</strong> <br>
-                        <small>${act.cals} kcal</small>
+        appData.activities.forEach(act => {
+            const isChecked = act.completed ? 'checked' : '';
+            const lineThrough = act.completed ? 'text-decoration:line-through; color:#aaa;' : '';
+            
+            const html = `
+                <div class="task-item">
+                    <input type="checkbox" class="task-checkbox" ${isChecked} onchange="toggleTask(${act.id})">
+                    <div class="task-content">
+                        <div class="task-title" style="${lineThrough}">${act.name}</div>
+                        <div class="task-meta">${act.cal} kcal</div>
+                        ${act.link ? `<a href="${act.link}" target="_blank" class="task-link">▶ Videoyu Aç</a>` : ''}
                     </div>
-                    ${act.link ? `<a href="${act.link}" target="_blank" class="activity-link">İzle ▶</a>` : ''}
-                    <button class="delete-btn" onclick="deleteActivity(${act.id})">Sil</button>
-                </div>`;
+                </div>
+            `;
+            container.innerHTML += html;
         });
-        calculateTotal();
     }
 
-    function toggleActivity(id) {
-        const act = activities.find(a => a.id === id);
-        if (act) { act.completed = !act.completed; saveData(); renderActivities(); }
+    function renderManageList() {
+        const container = document.getElementById('manageListContainer');
+        container.innerHTML = '';
+        appData.activities.forEach(act => {
+            container.innerHTML += `
+                <div class="task-item">
+                    <div class="task-content">
+                        <strong>${act.name}</strong> (${act.cal} kcal)
+                    </div>
+                    <button class="delete-btn" onclick="deleteTask(${act.id})">Sil</button>
+                </div>
+            `;
+        });
     }
 
-    function deleteActivity(id) {
-        if(confirm('Silmek istiyor musun?')) {
-            activities = activities.filter(a => a.id !== id);
-            saveData(); renderActivities();
+    function renderHistory() {
+        const tbody = document.querySelector('#historyTable tbody');
+        tbody.innerHTML = '';
+        appData.history.forEach(log => {
+            tbody.innerHTML += `<tr><td>${log.date}</td><td>${log.steps}</td><td>${log.total} kcal</td></tr>`;
+        });
+    }
+
+    // --- YENİ GÜN & KAYIT SİSTEMİ ---
+
+    function checkNewDay() {
+        const today = new Date().toLocaleDateString('tr-TR');
+        if(appData.lastDate !== today) {
+            // Gün değişmiş, arşive at
+            archiveCurrentDay(appData.lastDate);
+            appData.lastDate = today;
+            // Sıfırla
+            appData.dailySteps = 0;
+            appData.activities.forEach(a => a.completed = false);
+            saveData();
+            alert("Yeni bir gün! Skorların sıfırlandı, iyi şanslar! ☀️");
         }
     }
 
-    function calculateTotal() {
-        const weight = parseFloat(document.getElementById('userWeight').value) || 0;
-        const steps = parseInt(document.getElementById('dailySteps').value) || 0;
-        const stepCals = Math.round(steps * 0.0005 * weight);
-        
-        let sportCals = 0;
-        activities.forEach(act => { if (act.completed) sportCals += act.cals; });
+    function forceEndDay() {
+        if(confirm("Günü şimdi bitirip arşive kaydetmek istiyor musun?")) {
+            archiveCurrentDay(appData.lastDate + " (Manuel)");
+            appData.dailySteps = 0;
+            appData.activities.forEach(a => a.completed = false);
+            saveData();
+            updateUI();
+            switchPage('history');
+        }
+    }
 
-        document.getElementById('stepCalories').innerText = stepCals;
-        document.getElementById('sportCalories').innerText = sportCals;
-        document.getElementById('totalCalories').innerText = stepCals + sportCals;
-        
-        // Adım sayısını anlık kaydet (sayfa yenilenirse gitmesin diye)
-        localStorage.setItem('temp_steps', steps); 
+    function archiveCurrentDay(dateLabel) {
+        // Hesapla
+        const stepCals = Math.round(appData.dailySteps * 0.0005 * appData.weight);
+        let sportCals = 0;
+        appData.activities.forEach(a => { if(a.completed) sportCals += a.cal; });
+        const total = stepCals + sportCals;
+
+        if(total > 0) { // Sadece veri varsa kaydet
+            appData.history.unshift({
+                date: dateLabel,
+                steps: appData.dailySteps,
+                total: total
+            });
+        }
     }
 
     function saveData() {
-        localStorage.setItem('my_activities_v2', JSON.stringify(activities));
-        localStorage.setItem('my_history_v2', JSON.stringify(historyLog));
-        localStorage.setItem('my_weight', document.getElementById('userWeight').value);
+        appData.height = document.getElementById('userHeight').value;
+        localStorage.setItem('fitTakipData', JSON.stringify(appData));
     }
 
     function loadData() {
-        if(localStorage.getItem('my_activities_v2')) activities = JSON.parse(localStorage.getItem('my_activities_v2'));
-        if(localStorage.getItem('my_history_v2')) historyLog = JSON.parse(localStorage.getItem('my_history_v2'));
-        if(localStorage.getItem('my_weight')) document.getElementById('userWeight').value = localStorage.getItem('my_weight');
-        
-        // Geçici adım sayısını sadece tarih aynıysa geri yükle, yoksa 0 kalacak
-        if(localStorage.getItem('last_active_date') === currentDate) {
-            document.getElementById('dailySteps').value = localStorage.getItem('temp_steps') || '';
+        const saved = localStorage.getItem('fitTakipData');
+        if(saved) {
+            appData = JSON.parse(saved);
         }
     }
     
+    function saveProfile() {
+        saveData();
+    }
+    
     function clearHistory() {
-        if(confirm("Tüm geçmiş kayıtları silmek istediğine emin misin?")) {
-            historyLog = [];
+        if(confirm("Geçmiş silinsin mi?")) {
+            appData.history = [];
             saveData();
-            renderHistory();
+            updateUI();
         }
     }
+
 </script>
 
 </body>
