@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FitTakip Pro - Global</title>
+    <title>FitTakip</title>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -22,7 +22,7 @@
             display: flex; gap: 10px;
         }
         .header-controls {
-            display: flex; gap: 8px; margin-left: auto; /* Sağa yasla */
+            display: flex; gap: 8px; margin-left: auto;
         }
         .icon-btn {
             background: rgba(128,128,128,0.15); border: 1px solid var(--border); cursor: pointer;
@@ -39,11 +39,22 @@
         .login-card {
             background: var(--card-bg); padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             width: 100%; max-width: 350px;
+            transition: 0.3s;
         }
+        .login-card h1 { margin-bottom: 5px; color: var(--text); }
         .login-card h2 { margin-top: 0; color: var(--primary); }
-        .login-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; background: var(--input-bg); color: var(--text); box-sizing: border-box; }
-        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
         
+        /* GİZLENEBİLİR ALANLAR */
+        #auth-forms { display: none; margin-top: 20px; }
+        #welcome-buttons { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; width: 100%; }
+        
+        .login-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; background: var(--input-bg); color: var(--text); box-sizing: border-box; }
+        
+        button.primary-btn { width: 100%; background-color: var(--primary); color: white; padding: 14px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        button.secondary-btn { width: 100%; background-color: transparent; border: 1px solid var(--border); color: var(--text); padding: 14px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button.text-btn { background: none; border: none; color: var(--text); opacity: 0.7; cursor: pointer; margin-top: 10px; text-decoration: underline; font-size: 14px; }
+
+        /* UYGULAMA İÇİ */
         #appPage { display: none; }
 
         /* HEADER & MENÜ */
@@ -65,9 +76,6 @@
         .page.active { display: block; }
         .card { background: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: 0.3s; }
         
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); border-radius: 8px; box-sizing: border-box; }
-        button.primary-btn { width: 100%; background-color: var(--primary); color: white; padding: 14px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        
         /* WIDGETLAR */
         .bmi-box { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.03); padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
         .task-item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid var(--border); }
@@ -88,15 +96,23 @@
             <h1>FitTakip ☁️</h1>
             <p id="txt_loginSub">Verilerin artık bulutta saklanıyor.</p>
             
-            <input type="email" id="email" placeholder="E-posta Adresi">
-            <input type="password" id="password" placeholder="Şifre">
-            <p id="loginError" class="error-msg"></p>
-
-            <div class="btn-group">
-                <button class="primary-btn" id="btn_login" onclick="girisYap()">Giriş Yap</button>
-                <button class="primary-btn" id="btn_register" onclick="kayitOl()" style="background-color: #6c757d;">Kayıt Ol</button>
+            <div id="welcome-buttons">
+                <button class="primary-btn" onclick="showForm('login')" id="btn_welcome_login">Giriş Yap</button>
+                <button class="secondary-btn" onclick="showForm('register')" id="btn_welcome_reg">Kayıt Ol</button>
             </div>
-            <div style="margin-top:20px; font-size:12px; opacity:0.6;">FitTakip Global v7.0</div>
+
+            <div id="auth-forms">
+                <h2 id="form-title">Giriş</h2>
+                <input type="email" id="email" placeholder="E-posta Adresi">
+                <input type="password" id="password" placeholder="Şifre">
+                <p id="loginError" class="error-msg"></p>
+
+                <button class="primary-btn" id="btn_action" onclick="performAuth()">Giriş Yap</button>
+                
+                <button class="text-btn" onclick="goBack()" id="btn_back">← Geri Dön</button>
+            </div>
+
+            <div style="margin-top:20px; font-size:12px; opacity:0.6;">FitTakip Global v8.0</div>
         </div>
     </div>
 
@@ -228,6 +244,10 @@
             passPh: "Şifre",
             loginBtn: "Giriş Yap",
             regBtn: "Kayıt Ol",
+            backBtn: "← Geri Dön",
+            welcome_login: "Giriş Yap",
+            welcome_reg: "Kayıt Ol",
+            
             menu_home: "Ana Sayfa", menu_add: "Aktivite Ekle", menu_history: "Geçmiş", menu_profile: "Ayarlar", menu_logout: "Çıkış Yap",
             remind: "⚠️ Tartılma zamanı!",
             bodyStat: "Vücut Durumu", cur: "Mevcut", tar: "Hedef",
@@ -237,9 +257,11 @@
             histTitle: "Geçmiş", th_date: "Tarih", th_step: "Adım", th_cal: "Kcal", clearHist: "Geçmişi Sil",
             settings: "Ayarlar", lbl_height: "Boy (cm)", lbl_weight: "Kilo (kg)", lbl_target: "Hedef Kilo", lbl_freq: "Hatırlatma Sıklığı", saveBtn: "Kaydet",
             endDay: "Günü Bitir", archBtn: "Günü Arşivle",
+            
             alert_newDay: "Yeni bir gün başladı!", alert_saved: "Kaydedildi!", alert_added: "Eklendi!",
-            alert_mail_sent: "Doğrulama maili gönderildi! Lütfen mail kutunu kontrol et.",
+            alert_mail_sent: "✅ Doğrulama maili gönderildi!\n\n⚠️ Lütfen SPAM (Gereksiz) klasörünü mutlaka kontrol et.",
             alert_verify_first: "Lütfen önce e-posta adresine gelen linke tıkla!",
+            spam_check: "Spam kutusunu kontrol etmeyi unutma!",
             lbl_normal: "Normal", lbl_over: "Fazla", lbl_obese: "Obez", lbl_weak: "Zayıf"
         },
         en: {
@@ -248,6 +270,10 @@
             passPh: "Password",
             loginBtn: "Login",
             regBtn: "Register",
+            backBtn: "← Back",
+            welcome_login: "Login",
+            welcome_reg: "Register",
+
             menu_home: "Dashboard", menu_add: "Add Activity", menu_history: "History", menu_profile: "Settings", menu_logout: "Logout",
             remind: "⚠️ Time to weigh in!",
             bodyStat: "Body Stats", cur: "Current", tar: "Target",
@@ -257,9 +283,11 @@
             histTitle: "History", th_date: "Date", th_step: "Steps", th_cal: "Kcal", clearHist: "Clear History",
             settings: "Settings", lbl_height: "Height (cm)", lbl_weight: "Weight (kg)", lbl_target: "Target Weight", lbl_freq: "Reminder Freq", saveBtn: "Save",
             endDay: "End Day", archBtn: "Archive Day",
+            
             alert_newDay: "A new day has started!", alert_saved: "Saved!", alert_added: "Added!",
-            alert_mail_sent: "Verification email sent! Please check your inbox.",
+            alert_mail_sent: "✅ Verification email sent!\n\n⚠️ Please check your SPAM/Junk folder.",
             alert_verify_first: "Please verify your email address first!",
+            spam_check: "Don't forget to check your spam folder!",
             lbl_normal: "Normal", lbl_over: "Overweight", lbl_obese: "Obese", lbl_weak: "Underweight"
         }
     };
@@ -274,33 +302,72 @@
 
     let appData = JSON.parse(JSON.stringify(defaultData));
     
-    // Tarayıcı hafızasındaki (giriş yapmadan önceki) tercihler
+    // Tarayıcı hafızasındaki tercihler
     let localLang = localStorage.getItem('localLang') || 'tr';
     let localTheme = localStorage.getItem('localTheme') || 'light';
+    let authMode = 'login'; // 'login' veya 'register'
 
-    // Sayfa Yüklenince Ayarları Uygula
     window.onload = function() {
         applySettingsToDOM(localLang, localTheme);
     };
 
+    // --- ARAYÜZ YÖNETİMİ (GİRİŞ EKRANI) ---
+    function showForm(mode) {
+        authMode = mode;
+        const p = langPack[localLang];
+        
+        // Başlığı ve Butonu Ayarla
+        document.getElementById('form-title').innerText = (mode === 'login') ? p.welcome_login : p.welcome_reg;
+        document.getElementById('btn_action').innerText = (mode === 'login') ? p.loginBtn : p.regBtn;
+        
+        // Görünümü Değiştir
+        document.getElementById('welcome-buttons').style.display = 'none';
+        document.getElementById('auth-forms').style.display = 'block';
+    }
+
+    function goBack() {
+        document.getElementById('auth-forms').style.display = 'none';
+        document.getElementById('welcome-buttons').style.display = 'flex';
+        document.getElementById('loginError').style.display = 'none';
+        document.getElementById('password').value = '';
+    }
+
+    function performAuth() {
+        if(authMode === 'login') girisYap();
+        else kayitOl();
+    }
+
     // --- OTURUM YÖNETİMİ ---
     auth.onAuthStateChanged(user => {
         if (user) {
-            // E-POSTA ONAY KONTROLÜ
             if (!user.emailVerified) {
-                auth.signOut();
-                alert(langPack[localLang].alert_verify_first);
+                // Mail Onaylı Değilse Sor
+                const yeniMailIste = confirm(langPack[localLang].alert_verify_first + "\n\n" + (localLang==='tr'?"Yeni link gönderilsin mi?":"Resend link?"));
+                
+                if (yeniMailIste) {
+                    user.sendEmailVerification().then(() => {
+                        alert(langPack[localLang].alert_mail_sent);
+                        auth.signOut();
+                    }).catch(err => {
+                        alert("Error: " + err.message);
+                        auth.signOut();
+                    });
+                } else {
+                    auth.signOut();
+                }
                 return;
             }
 
+            // Giriş Başarılı
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('appPage').style.display = 'block';
             document.getElementById('userEmailDisplay').innerText = user.email;
             loadFromCloud(user.uid); 
         } else {
+            // Çıkış
             document.getElementById('loginPage').style.display = 'flex';
             document.getElementById('appPage').style.display = 'none';
-            // Çıkış yapınca local ayarları geri yükle
+            goBack(); // Ana ekrana dön
             applySettingsToDOM(localLang, localTheme);
         }
     });
@@ -315,7 +382,6 @@
         const e = document.getElementById('email').value;
         const p = document.getElementById('password').value;
         appData = JSON.parse(JSON.stringify(defaultData)); 
-        // Kullanıcının kayıt olurken seçtiği dili/temayı kaydet
         appData.lang = localLang;
         appData.theme = localTheme;
 
@@ -341,7 +407,6 @@
     function t(key) { return langPack[appData.lang || localLang][key]; }
 
     function toggleLang() {
-        // Şu anki dil ne? (Giriş yaptıysa appData, yapmadıysa localLang)
         const current = (auth.currentUser) ? appData.lang : localLang;
         const newLang = current === 'tr' ? 'en' : 'tr';
         
@@ -349,7 +414,11 @@
         else { localLang = newLang; localStorage.setItem('localLang', newLang); }
         
         applySettingsToDOM(newLang, (auth.currentUser ? appData.theme : localTheme));
-        updateUI(); // İçerikleri güncelle
+        updateUI(); 
+        // Eğer giriş ekranındaysa başlıkları güncelle
+        if(document.getElementById('loginPage').style.display !== 'none') {
+             if(authMode) showForm(authMode);
+        }
     }
 
     function toggleThemeGlobal() {
@@ -363,10 +432,8 @@
     }
 
     function applySettingsToDOM(l, th) {
-        // 1. Temayı CSS'e uygula
         document.documentElement.setAttribute('data-theme', th);
         
-        // 2. Buton ikonlarını güncelle
         const langTxt = l.toUpperCase();
         const themeIcon = th === 'light' ? '☀' : '🌙';
         
@@ -375,16 +442,16 @@
         document.getElementById('themeBtnLogin').innerText = themeIcon;
         document.getElementById('themeBtnApp').innerText = themeIcon;
 
-        // 3. Metinleri dile göre değiştir
         const p = langPack[l];
-        // Login
+        // Login Page UI
         document.getElementById('txt_loginSub').innerText = p.loginSub;
         document.getElementById('email').placeholder = p.emailPh;
         document.getElementById('password').placeholder = p.passPh;
-        document.getElementById('btn_login').innerText = p.loginBtn;
-        document.getElementById('btn_register').innerText = p.regBtn;
+        document.getElementById('btn_back').innerText = p.backBtn;
+        document.getElementById('btn_welcome_login').innerText = p.welcome_login;
+        document.getElementById('btn_welcome_reg').innerText = p.welcome_reg;
         
-        // App
+        // App Page UI
         document.getElementById('txt_userTitle').innerText = (l==='tr'?'KULLANICI':'USER');
         document.getElementById('menu_home').innerText = p.menu_home;
         document.getElementById('menu_add').innerText = p.menu_add;
@@ -424,7 +491,7 @@
         document.getElementById('btn_archive').innerText = p.archBtn;
     }
 
-    // --- DATABASE İŞLEMLERİ ---
+    // --- DATABASE ---
     function saveToCloud() {
         const user = auth.currentUser;
         if(user) {
@@ -437,7 +504,6 @@
         db.collection('users').doc(uid).get().then(doc => {
             if (doc.exists) {
                 appData = doc.data();
-                // Veride dil/tema yoksa varsayılanı ata
                 if(!appData.lang) appData.lang = 'tr';
                 if(!appData.theme) appData.theme = 'light';
                 
